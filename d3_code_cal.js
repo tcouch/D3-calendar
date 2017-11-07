@@ -3,14 +3,7 @@ var   w = 800,
       square = 60;
 var   weekdayLabelHeight = square/3;
 
-var weekday = new Array();
-weekday[0] = "Sunday";
-weekday[1] = "Monday";
-weekday[2] = "Tuesday";
-weekday[3] = "Wednesday";
-weekday[4] = "Thursday";
-weekday[5] = "Friday";
-weekday[6] = "Saturday";
+var weekday = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 
 var margin = {left:10,right:10,top:10,bottom:0};
 var internalCalendarMargin = 10;
@@ -33,7 +26,7 @@ console.log(numdays);
 console.log(firstDayName);
 
 
-// create the svg
+// create the calendar
 var svg = d3.select("body").append("svg").attr("width", w).attr("height", h);
 
 var calendar = svg.append("g").attr("id","calendar")
