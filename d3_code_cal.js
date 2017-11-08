@@ -18,12 +18,13 @@ return 32 - new Date(iYear, iMonth, 32).getDate();
 
 var numdays = daysInMonth(month,year);
 var firstDay = new Date(year, month, 1);
-var firstDayNumber = firstDay.getDay();
+var firstDayNumber = (firstDay.getDay()+6)%7;
 var firstDayName = weekday[firstDayNumber];
-var days = new Array(numdays)
+var days = new Array(35);
 
 console.log(numdays);
 console.log(firstDayName);
+var lastMonthDays = new Date(year, month, 0).getDate();
 
 
 // create the calendar
@@ -34,6 +35,15 @@ d3.select("#weekdayLabels").selectAll(".dayOfWeek")
       .attr("class","dayOfWeek")
       .attr("id",function(d){return d;})
       .html(function(d){ return d ;});
+
+d3.select("#monthLayout").selectAll(".dateBox")
+  .data(days)
+  .enter()
+    .append("div")
+      .attr("class", function(d,i) {
+        return "dateBox " + weekday[i%7];
+      });
+
 
 // var svg = d3.select("body").append("svg").attr("width", w).attr("height", h);
 //
