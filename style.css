@@ -31,6 +31,7 @@ body {
 #weekdayLabels {
   width: 100%;
   clear: both;
+  padding-left: 5px;
 }
 
 .dayOfWeek {
@@ -38,7 +39,7 @@ body {
   height: 20px;
   float: left;
   background-color: blue;
-  margin: 2px 0px 5px 10px;
+  margin: 2px 5px 5px 5px;
   font-family: 'Roboto Slab', serif;
   font-size: 10px;
   color: white;
@@ -50,12 +51,16 @@ body {
   background-color: red;
 }
 
+#monthLayout {
+  padding-left: 5px;
+}
+
 .dateBox {
   width: 60px;
   height: 60px;
   float:left;
   background-color: lightBlue;
-  margin: 0px 0px 5px 10px;
+  margin: 2px 5px 2px 5px;
 }
 
 .dateBox p {
@@ -65,4 +70,11 @@ body {
 
 .Saturday, .Sunday {
   background-color: pink;
+}
+
+.today {
+  border-style: solid;
+  border-width: 2px;
+  border-color: violet;
+  margin: 0px 3px 0px 3px;
 }

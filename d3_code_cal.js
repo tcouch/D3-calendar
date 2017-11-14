@@ -3,10 +3,14 @@ var   w = 800,
       square = 60;
 var   weekdayLabelHeight = square/3;
 
-var weekday = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+var weekdays = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday",
+                "Sunday"];
+var months = ["January","February","March","April","May","June","July",
+              "August","September","October","November","December"]
 
 var today = new Date();
-var month = today.getMonth(),
+var date = today.getDate(),
+    month = today.getMonth(),
     year = today.getFullYear();
 
 function daysInMonth(iMonth, iYear)
@@ -23,6 +27,12 @@ function firstDayNumber(iMonth, iYear){
   return (firstDay.getDay()+6)%7;
 }
 
+function getBoxNumber(iDate, iMonth, iYear){
+  firstDay = firstDayNumber(iMonth, iYear);
+  boxNumber = firstDay + iDate - 1;
+  return boxNumber;
+}
+
 function makeDaysArray(iMonth, iYear){
   daysArray = new Array(42);
   monthLength = daysInMonth(iMonth, iYear);
@@ -31,33 +41,47 @@ function makeDaysArray(iMonth, iYear){
   console.log(monthLength);
   var day = 1;
   for (i=monthStart; i< (monthLength+monthStart); i++) {
-    daysArray[i] = day;
+    daysArray[i] = {};
+    daysArray[i]["number"] = day;
+    daysArray[i]["month"] = iMonth;
+    daysArray[i]["monthName"] = months[iMonth];
     day += 1;
   }
   day = 1;
   for (i=(monthLength+monthStart); i<42; i++) {
-    daysArray[i] = day;
+    daysArray[i] = {};
+    daysArray[i]["number"] = day;
+    daysArray[i]["month"] = (iMonth+1)%12;
+    daysArray[i]["monthName"] = months[(iMonth+1)%12];
     day += 1;
   }
   lastMonthLength = daysLastMonth(iMonth, iYear);
   day = lastMonthLength - monthStart + 1
   for (i=0; i<monthStart; i++) {
-    daysArray[i] = day;
+    daysArray[i] = {};
+    daysArray[i]["number"] = day;
+    daysArray[i]["month"] = (iMonth-1)%12;
+    daysArray[i]["monthName"] = months[(iMonth-1)%12];
     day += 1;
+  }
+  for (i=0; i<42; i++) {
+    daysArray[i]["dayName"] = weekdays[i%7];
+    daysArray[i]["ID"] = "box"+i;
   }
   return daysArray;
 }
 
-var days = new Array(35);
-var daysArray2 = makeDaysArray(month, year);
+var dateBoxData = makeDaysArray(month, year);
+var todayBoxNumber = getBoxNumber(date,month,year);
 
-console.log(daysArray2);
+console.log(dateBoxData);
+console.log(todayBoxNumber);
 
 
 
 // create the calendar
 d3.select("#weekdayLabels").selectAll(".dayOfWeek")
-  .data(weekday)
+  .data(weekdays)
   .enter()
     .append("div")
       .attr("class","dayOfWeek")
@@ -65,15 +89,17 @@ d3.select("#weekdayLabels").selectAll(".dayOfWeek")
       .html(function(d){ return d ;});
 
 d3.select("#monthLayout").selectAll(".dateBox")
-  .data(daysArray2)
+  .data(dateBoxData)
   .enter()
     .append("div")
       .attr("class", function(d,i) {
-        return "dateBox " + weekday[i%7];
+        return "dateBox " + d["dayName"];
       })
-      .html(function(d){ return "<p>"+d+"</p>";});
+      .attr("id",function(d){ return d["ID"]; })
+      .html(function(d){ return "<p>"+d["number"]+"</p>";});
 
-
+d3.select("#box"+todayBoxNumber)
+  .classed("today", true);
 
 
 // var svg = d3.select("body").append("svg").attr("width", w).attr("height", h);
