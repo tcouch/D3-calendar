@@ -5,8 +5,6 @@ var   weekdayLabelHeight = square/3;
 
 var weekday = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
 
-var margin = {left:10,right:10,top:10,bottom:0};
-var internalCalendarMargin = 10;
 var today = new Date();
 var month = today.getMonth(),
     year = today.getFullYear();
@@ -16,15 +14,45 @@ function daysInMonth(iMonth, iYear)
 return 32 - new Date(iYear, iMonth, 32).getDate();
 }
 
-var numdays = daysInMonth(month,year);
-var firstDay = new Date(year, month, 1);
-var firstDayNumber = (firstDay.getDay()+6)%7;
-var firstDayName = weekday[firstDayNumber];
-var days = new Array(35);
+function daysLastMonth(iMonth, iYear){
+  return new Date(iYear, iMonth, 0).getDate();
+}
 
-console.log(numdays);
-console.log(firstDayName);
-var lastMonthDays = new Date(year, month, 0).getDate();
+function firstDayNumber(iMonth, iYear){
+  var firstDay = new Date(iYear, iMonth, 1);
+  return (firstDay.getDay()+6)%7;
+}
+
+function makeDaysArray(iMonth, iYear){
+  daysArray = new Array(42);
+  monthLength = daysInMonth(iMonth, iYear);
+  monthStart = firstDayNumber(iMonth, iYear);
+  console.log(monthStart);
+  console.log(monthLength);
+  var day = 1;
+  for (i=monthStart; i< (monthLength+monthStart); i++) {
+    daysArray[i] = day;
+    day += 1;
+  }
+  day = 1;
+  for (i=(monthLength+monthStart); i<42; i++) {
+    daysArray[i] = day;
+    day += 1;
+  }
+  lastMonthLength = daysLastMonth(iMonth, iYear);
+  day = lastMonthLength - monthStart + 1
+  for (i=0; i<monthStart; i++) {
+    daysArray[i] = day;
+    day += 1;
+  }
+  return daysArray;
+}
+
+var days = new Array(35);
+var daysArray2 = makeDaysArray(month, year);
+
+console.log(daysArray2);
+
 
 
 // create the calendar
@@ -37,12 +65,15 @@ d3.select("#weekdayLabels").selectAll(".dayOfWeek")
       .html(function(d){ return d ;});
 
 d3.select("#monthLayout").selectAll(".dateBox")
-  .data(days)
+  .data(daysArray2)
   .enter()
     .append("div")
       .attr("class", function(d,i) {
         return "dateBox " + weekday[i%7];
-      });
+      })
+      .html(function(d){ return "<p>"+d+"</p>";});
+
+
 
 
 // var svg = d3.select("body").append("svg").attr("width", w).attr("height", h);

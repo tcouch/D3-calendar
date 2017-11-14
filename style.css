@@ -38,7 +38,7 @@ body {
   height: 20px;
   float: left;
   background-color: blue;
-  margin: 10px 0px 10px 10px;
+  margin: 2px 0px 5px 10px;
   font-family: 'Roboto Slab', serif;
   font-size: 10px;
   color: white;
@@ -55,7 +55,12 @@ body {
   height: 60px;
   float:left;
   background-color: lightBlue;
-  margin: 0px 0px 10px 10px;
+  margin: 0px 0px 5px 10px;
+}
+
+.dateBox p {
+  margin-top: 0px;
+  margin-left: 2px;
 }
 
 .Saturday, .Sunday {
