@@ -45,6 +45,7 @@ function makeDaysArray(iMonth, iYear){
     daysArray[i]["number"] = day;
     daysArray[i]["month"] = iMonth;
     daysArray[i]["monthName"] = months[iMonth];
+    daysArray[i]["notCurrent"] = false;
     day += 1;
   }
   day = 1;
@@ -53,6 +54,7 @@ function makeDaysArray(iMonth, iYear){
     daysArray[i]["number"] = day;
     daysArray[i]["month"] = (iMonth+1)%12;
     daysArray[i]["monthName"] = months[(iMonth+1)%12];
+    daysArray[i]["notCurrent"] = true;
     day += 1;
   }
   lastMonthLength = daysLastMonth(iMonth, iYear);
@@ -62,6 +64,7 @@ function makeDaysArray(iMonth, iYear){
     daysArray[i]["number"] = day;
     daysArray[i]["month"] = (iMonth-1)%12;
     daysArray[i]["monthName"] = months[(iMonth-1)%12];
+    daysArray[i]["notCurrent"] = true;
     day += 1;
   }
   for (i=0; i<42; i++) {
@@ -93,9 +96,10 @@ d3.select("#monthLayout").selectAll(".dateBox")
   .data(dateBoxData)
   .enter()
     .append("div")
-      .attr("class", function(d,i) {
+      .attr("class", function(d) {
         return "dateBox " + d["dayName"];
       })
+      .classed("notCurrent", function(d){ return d["notCurrent"]; })
       .on("click", selectBox)
       .attr("id",function(d){ return d["ID"]; })
       .html(function(d){ return "<p>"+d["number"]+"</p>";});
