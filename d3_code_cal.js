@@ -71,13 +71,14 @@ function makeDaysArray(iMonth, iYear){
   return daysArray;
 }
 
+function selectBox() {
+  selected.classed("selected",false);
+  selected = d3.select(this);
+  selected.classed("selected",true);
+}
+
 var dateBoxData = makeDaysArray(month, year);
-var todayBoxNumber = getBoxNumber(date,month,year);
-
 console.log(dateBoxData);
-console.log(todayBoxNumber);
-
-
 
 // create the calendar
 d3.select("#weekdayLabels").selectAll(".dayOfWeek")
@@ -95,53 +96,10 @@ d3.select("#monthLayout").selectAll(".dateBox")
       .attr("class", function(d,i) {
         return "dateBox " + d["dayName"];
       })
+      .on("click", selectBox)
       .attr("id",function(d){ return d["ID"]; })
       .html(function(d){ return "<p>"+d["number"]+"</p>";});
 
-d3.select("#box"+todayBoxNumber)
-  .classed("today", true);
-
-
-// var svg = d3.select("body").append("svg").attr("width", w).attr("height", h);
-//
-// var calendar = svg.append("g").attr("id","calendar")
-//                     .attr("transform","translate("+margin.left+","+margin.top+")");
-//
-//
-// calendar.selectAll(".weekdayLabel")
-//   .data(weekday)
-//   .enter()
-//     .append("g")
-//       .attr("class","weekdayLabel")
-//       .append("rect")
-//       .attr("height",weekdayLabelHeight)
-//       .attr("width",square)
-//       .attr("fill","blue")
-//       .attr("x",function(d,i){ return (square+internalCalendarMargin)*((i+6)%7); })
-//       .attr("y",0);
-//
-// calendar.selectAll(".weekdayLabel")
-//   .append("text")
-//   .attr("transform",function(d,i){ return "translate("+((square+internalCalendarMargin)*((i+6)%7)+5)+",12)";})
-//   .attr("font-size","0.5em")
-//   .attr("fill", "white")
-//   .text(function(d,i){ return weekday[i];});
-//
-// calendar.selectAll(".day")
-//   .data(days)
-//   .enter()
-//     .append("g")
-//       .attr("class","day")
-//       .append("rect")
-//       .attr("height",square)
-//       .attr("width",square)
-//       .attr("fill","pink")
-//       .attr("x",function(d,i){ return (square+internalCalendarMargin)*((firstDayNumber+i-1)%7); })
-//       .attr("y",function(d,i){ return (Math.floor((i+firstDayNumber-1)/7)*(square+internalCalendarMargin))+weekdayLabelHeight+internalCalendarMargin});
-//
-// calendar.selectAll(".day")
-//   .append("text")
-//   .attr("transform",function(d,i){ return "translate("+((square+internalCalendarMargin)*((firstDayNumber+i-1)%7)+2)+","+((Math.floor((firstDayNumber+i-1)/7)*(square+internalCalendarMargin)+15)+weekdayLabelHeight+internalCalendarMargin)+")";})
-//   .attr("font-size","1em")
-//   .attr("color", "black")
-//   .text(function(d,i){ return (i+1).toString();});
+var todayBoxNumber = getBoxNumber(date,month,year);
+var selected = d3.select("#box"+todayBoxNumber);
+selected.classed("selected",true);
