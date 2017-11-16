@@ -100,6 +100,7 @@ d3.select("#monthLayout").selectAll(".dateBox")
       .attr("id",function(d){ return d["ID"]; })
       .html(function(d){ return "<p>"+d["number"]+"</p>";});
 
+// select todayBox to start
 var todayBoxNumber = getBoxNumber(date,month,year);
-var selected = d3.select("#box"+todayBoxNumber);
-selected.classed("selected",true);
+var selected = d3.select("#box"+todayBoxNumber)
+selected.each(selectBox);
