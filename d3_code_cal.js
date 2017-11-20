@@ -45,6 +45,7 @@ function makeDaysArray(iMonth, iYear){
     daysArray[i]["number"] = day;
     daysArray[i]["month"] = iMonth;
     daysArray[i]["monthName"] = months[iMonth];
+    daysArray[i]["year"] = iYear;
     daysArray[i]["notCurrent"] = false;
     day += 1;
   }
@@ -54,6 +55,7 @@ function makeDaysArray(iMonth, iYear){
     daysArray[i]["number"] = day;
     daysArray[i]["month"] = (iMonth+1)%12;
     daysArray[i]["monthName"] = months[(iMonth+1)%12];
+    daysArray[i]["year"] = iYear;
     daysArray[i]["notCurrent"] = true;
     day += 1;
   }
@@ -64,12 +66,29 @@ function makeDaysArray(iMonth, iYear){
     daysArray[i]["number"] = day;
     daysArray[i]["month"] = (iMonth-1)%12;
     daysArray[i]["monthName"] = months[(iMonth-1)%12];
+    daysArray[i]["year"] = iYear;
     daysArray[i]["notCurrent"] = true;
     day += 1;
   }
   for (i=0; i<42; i++) {
     daysArray[i]["dayName"] = weekdays[i%7];
     daysArray[i]["ID"] = "box"+i;
+    if ([1,21,31].indexOf(daysArray[i]["number"]) != -1 ) {
+      daysArray[i]["suffix"] = "st";
+    }
+    else if ([2,22].indexOf(daysArray[i]["number"]) != -1 ) {
+      daysArray[i]["suffix"] = "nd";
+    }
+    else if ([3,23].indexOf(daysArray[i]["number"]) != -1 ) {
+      daysArray[i]["suffix"] = "rd";
+    }
+    else {
+      daysArray[i]["suffix"] = "th";
+    }
+    daysArray[i]["longName"] = daysArray[i]["dayName"] + " "
+                             + daysArray[i]["number"] + daysArray[i]["suffix"]
+                             + " " + daysArray[i]["monthName"] + " "
+                             + daysArray[i]["year"];
   }
   return daysArray;
 }
@@ -78,6 +97,9 @@ function selectBox() {
   selected.classed("selected",false);
   selected = d3.select(this);
   selected.classed("selected",true);
+  selected.data = selected.datum();
+  d3.select("#detailBox")
+    .html(function(){ return "<h3>"+selected.data["longName"]+"</h3>";});
 }
 
 var dateBoxData = makeDaysArray(month, year);

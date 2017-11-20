@@ -28,6 +28,12 @@ body {
   float: right;
 }
 
+#detailBox h3 {
+  color: WhiteSmoke;
+  margin: 0px;
+  padding: 10px 0px 0px 10px;
+}
+
 #weekdayLabels {
   width: 100%;
   clear: both;
