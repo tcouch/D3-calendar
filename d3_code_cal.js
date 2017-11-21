@@ -37,8 +37,9 @@ function makeDaysArray(iMonth, iYear){
   daysArray = new Array(42);
   monthLength = daysInMonth(iMonth, iYear);
   monthStart = firstDayNumber(iMonth, iYear);
-  console.log(monthStart);
-  console.log(monthLength);
+  prevMonthYear = new Date(iYear,iMonth,0).getFullYear();
+  console.log(prevMonthYear);
+  prevMonthLength = daysLastMonth(iMonth, iYear);
   var day = 1;
   for (i=monthStart; i< (monthLength+monthStart); i++) {
     daysArray[i] = {};
@@ -55,18 +56,17 @@ function makeDaysArray(iMonth, iYear){
     daysArray[i]["number"] = day;
     daysArray[i]["month"] = (iMonth+1)%12;
     daysArray[i]["monthName"] = months[(iMonth+1)%12];
-    daysArray[i]["year"] = iYear;
+    daysArray[i]["year"] = new Date(iYear,iMonth,32).getFullYear();
     daysArray[i]["notCurrent"] = true;
     day += 1;
   }
-  lastMonthLength = daysLastMonth(iMonth, iYear);
-  day = lastMonthLength - monthStart + 1
+  day = prevMonthLength - monthStart + 1
   for (i=0; i<monthStart; i++) {
     daysArray[i] = {};
     daysArray[i]["number"] = day;
     daysArray[i]["month"] = (iMonth-1)%12;
-    daysArray[i]["monthName"] = months[(iMonth-1)%12];
-    daysArray[i]["year"] = iYear;
+    daysArray[i]["monthName"] = months[(iMonth+11)%12];
+    daysArray[i]["year"] = prevMonthYear;
     daysArray[i]["notCurrent"] = true;
     day += 1;
   }
@@ -102,9 +102,6 @@ function selectBox() {
     .html(function(){ return "<h3>"+selected.data["longName"]+"</h3>";});
 }
 
-var dateBoxData = makeDaysArray(month, year);
-console.log(dateBoxData);
-
 // create the calendar
 d3.select("#weekdayLabels").selectAll(".dayOfWeek")
   .data(weekdays)
@@ -114,17 +111,42 @@ d3.select("#weekdayLabels").selectAll(".dayOfWeek")
       .attr("id",function(d){return d;})
       .html(function(d){ return d ;});
 
-d3.select("#monthLayout").selectAll(".dateBox")
-  .data(dateBoxData)
-  .enter()
-    .append("div")
-      .attr("class", function(d) {
-        return "dateBox " + d["dayName"];
-      })
-      .classed("notCurrent", function(d){ return d["notCurrent"]; })
-      .on("click", selectBox)
-      .attr("id",function(d){ return d["ID"]; })
-      .html(function(d){ return "<p>"+d["number"]+"</p>";});
+function drawMonth(iMonth,iYear) {
+  dateBoxData = makeDaysArray(iMonth, iYear)
+  console.log(dateBoxData);
+  d3.select("#monthLayout").selectAll(".dateBox")
+    .data(dateBoxData)
+    .enter()
+      .append("div")
+        .attr("class", function(d) {
+          return "dateBox " + d["dayName"];
+        })
+        .classed("notCurrent", function(d){ return d["notCurrent"]; })
+        .on("click", selectBox)
+        .attr("id",function(d){ return d["ID"]; })
+        .html(function(d){ return "<p>"+d["number"]+"</p>";});
+}
+
+
+d3.select("#monthPrev")
+  .on("click", function(){
+    prevMonthLastDay = new Date(year,month,0);
+    month = prevMonthLastDay.getMonth();
+    year = prevMonthLastDay.getFullYear();
+    d3.selectAll(".dateBox").remove();
+    drawMonth(month,year);
+  });
+
+  d3.select("#monthNext")
+    .on("click", function(){
+      nextMonthDate = new Date(year,month,32);
+      month = nextMonthDate.getMonth();
+      year = nextMonthDate.getFullYear();
+      d3.selectAll(".dateBox").remove();
+      drawMonth(month,year);
+    });
+
+drawMonth(month, year);
 
 // select todayBox to start
 var todayBoxNumber = getBoxNumber(date,month,year);
