@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css?family=Roboto+Slab" rel="stylesheet">
   <script type="text/javascript" src="d3.v4.js"></script>
+  <script type="text/javascript" src="secrets.json"></script>
 </head>
 <body>
 <div id="headerBox">
@@ -19,6 +20,9 @@
   <div id="monthLayout"></div>
 </div>
 <script src="d3_code_cal.js" charset="utf-8"></script>
-
+<script async defer src="https://apis.google.com/js/api.js"
+  onload="this.onload=function(){};handleClientLoad()"
+  onreadystatechange="if (this.readyState === 'complete') this.onload()">
+</script>
 </body>
 </html>

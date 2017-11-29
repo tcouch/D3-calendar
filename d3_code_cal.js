@@ -1,3 +1,4 @@
+//screen dimensions based on Raspberry Pi 7" touchscreen
 var   w = 800,
       h = 480,
       square = 60;
@@ -12,6 +13,19 @@ var today = new Date();
 var date = today.getDate(),
     month = today.getMonth(),
     year = today.getFullYear();
+
+// Get Client ID and API key from secrets.json
+var secrets = JSON.parse(secrets);
+var CLIENT_ID = secrets.web.client_id;
+var API_KEY = secrets.api_key;
+
+// Array of API discovery doc URLs for APIs used by the calendar
+var DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"];
+
+// Authorization scopes required by the API; multiple scopes can be
+// included, separated by spaces.
+var SCOPES = "https://www.googleapis.com/auth/calendar.readonly";
+
 
 function daysInMonth(iMonth, iYear)
 {
@@ -152,3 +166,19 @@ drawMonth(month, year);
 var todayBoxNumber = getBoxNumber(date,month,year);
 var selected = d3.select("#box"+todayBoxNumber)
 selected.each(selectBox);
+
+function initClient() {
+  gapi.client.init({
+    apiKey: API_KEY,
+    clientId: CLIENT_ID,
+    discoveryDocs: DISCOVERY_DOCS,
+    scope: SCOPES
+  })
+}
+
+function handleClientLoad() {
+  gapi.load('client:auth2', initClient);
+}
+
+console.log(typeof(Storage));
+localStorage.setItem('thing1','[1,2,3,4,5]');
