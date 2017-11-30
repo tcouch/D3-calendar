@@ -174,6 +174,7 @@ selected.each(selectBox);
 */
 function handleClientLoad() {
   gapi.load('client:auth2', initClient);
+  console.log("load ok");
 }
 
 /**
@@ -181,12 +182,14 @@ function handleClientLoad() {
 *  listeners.
 */
 function initClient() {
+  console.log("initialising...")
   gapi.client.init({
     apiKey: API_KEY,
     clientId: CLIENT_ID,
     discoveryDocs: DISCOVERY_DOCS,
     scope: SCOPES
-  }).then(function () {
+  }).then(function() {
+    console.log("promised");
     // Listen for sign-in state changes.
     gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
 
@@ -245,7 +248,7 @@ function appendPre(message) {
 */
 function listUpcomingEvents() {
   gapi.client.calendar.events.list({
-    'calendarId': 'primary',
+    'calendarId': 'hayleyptommyc@gmail.com',
     'timeMin': today.toISOString(),
     'timeMax': tomorrow.toISOString(),
     'showDeleted': false,
@@ -254,6 +257,8 @@ function listUpcomingEvents() {
     'orderBy': 'startTime'
   }).then(function(response) {
     var events = response.result.items;
+    console.log("running");
+    console.log(events);
     appendPre('Upcoming events:');
 
     if (events.length > 0) {
@@ -271,7 +276,4 @@ function listUpcomingEvents() {
   });
 }
 
-
-
-console.log(typeof(Storage));
 localStorage.setItem('thing1','[1,2,3,4,5]');
