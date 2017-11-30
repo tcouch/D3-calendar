@@ -30,7 +30,6 @@ var SCOPES = "https://www.googleapis.com/auth/calendar.readonly";
 var authorizeButton = document.getElementById('authorize-button');
 var signoutButton = document.getElementById('signout-button');
 
-
 function daysInMonth(iMonth, iYear)
 {
 return 32 - new Date(iYear, iMonth, 32).getDate();
@@ -46,18 +45,17 @@ function firstDayNumber(iMonth, iYear){
 }
 
 function getBoxNumber(iDate, iMonth, iYear){
-  firstDay = firstDayNumber(iMonth, iYear);
-  boxNumber = firstDay + iDate - 1;
+  var firstDay = firstDayNumber(iMonth, iYear);
+  var boxNumber = firstDay + iDate - 1;
   return boxNumber;
 }
 
 function makeDaysArray(iMonth, iYear){
-  daysArray = new Array(42);
-  monthLength = daysInMonth(iMonth, iYear);
-  monthStart = firstDayNumber(iMonth, iYear);
-  prevMonthYear = new Date(iYear,iMonth,0).getFullYear();
-  console.log(prevMonthYear);
-  prevMonthLength = daysLastMonth(iMonth, iYear);
+  var daysArray = new Array(42);
+  var monthLength = daysInMonth(iMonth, iYear);
+  var monthStart = firstDayNumber(iMonth, iYear);
+  var prevMonthYear = new Date(iYear,iMonth,0).getFullYear();
+  var prevMonthLength = daysLastMonth(iMonth, iYear);
   var day = 1;
   for (i=monthStart; i< (monthLength+monthStart); i++) {
     daysArray[i] = {};
