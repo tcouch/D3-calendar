@@ -11,20 +11,20 @@ body {
 #headerBox {
   width: 100%;
   height: 60px;
-  background-color: gray;
+  background-color: #003D4C;
 }
 
 #calendarBox {
   width: 500px;
   height: 420px;
-  background-color: FloralWhite;
+  background-color: #003D4C;
   float:left;
 }
 
 #detailBox {
   width: 300px;
   height: 420px;
-  background-color: DarkCyan;
+  background-color: #003D4C;
   float: right;
 }
 

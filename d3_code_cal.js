@@ -14,6 +14,7 @@ var date = today.getDate(),
     month = today.getMonth(),
     year = today.getFullYear();
 var tomorrow = new Date(year,month,date+1);
+var selected;
 
 // Get Client ID and API key from secrets.json
 var secrets = JSON.parse(secrets);
@@ -44,10 +45,10 @@ function firstDayNumber(iMonth, iYear){
   return (firstDay.getDay()+6)%7;
 }
 
-function getBoxNumber(iDate, iMonth, iYear){
+function getBoxID(iDate, iMonth, iYear){
   var firstDay = firstDayNumber(iMonth, iYear);
   var boxNumber = firstDay + iDate - 1;
-  return boxNumber;
+  return "#box" + boxNumber;
 }
 
 function makeDaysArray(iMonth, iYear){
@@ -114,8 +115,8 @@ function selectBox() {
   selected = d3.select(this);
   selected.classed("selected",true);
   selected.data = selected.datum();
-  d3.select("#detailBox")
-    .html(function(){ return "<h3>"+selected.data["longName"]+"</h3><pre id='content'></pre>";});
+  d3.select("#detailName")
+    .html(function(){ return selected.data["longName"];});
 }
 
 // create the calendar
@@ -127,9 +128,18 @@ d3.select("#weekdayLabels").selectAll(".dayOfWeek")
       .attr("id",function(d){return d;})
       .html(function(d){ return d ;});
 
+function getMonthEvents(iMonth,iYear) {
+  var firstDay = new Date(iYear, iMonth, 1);
+  var nDays = daysInMonth(iMonth, iYear);
+  var lastDay = new Date(iYear, iMonth, nDays);
+  var firstDayStr = firstDay.toISOString();
+  var lastDayStr = lastDay.toISOString();
+  listUpcomingEvents(firstDayStr, lastDayStr);
+}
+
 function drawMonth(iMonth,iYear) {
-  dateBoxData = makeDaysArray(iMonth, iYear)
-  console.log(dateBoxData);
+  var dateBoxData = makeDaysArray(iMonth, iYear);
+  getMonthEvents(iMonth, iYear);
   d3.select("#monthLayout").selectAll(".dateBox")
     .data(dateBoxData)
     .enter()
@@ -153,21 +163,14 @@ d3.select("#monthPrev")
     drawMonth(month,year);
   });
 
-  d3.select("#monthNext")
-    .on("click", function(){
-      nextMonthDate = new Date(year,month,32);
-      month = nextMonthDate.getMonth();
-      year = nextMonthDate.getFullYear();
-      d3.selectAll(".dateBox").remove();
-      drawMonth(month,year);
-    });
-
-drawMonth(month, year);
-
-// select todayBox to start
-var todayBoxNumber = getBoxNumber(date,month,year);
-var selected = d3.select("#box"+todayBoxNumber)
-selected.each(selectBox);
+d3.select("#monthNext")
+  .on("click", function(){
+    nextMonthDate = new Date(year,month,32);
+    month = nextMonthDate.getMonth();
+    year = nextMonthDate.getFullYear();
+    d3.selectAll(".dateBox").remove();
+    drawMonth(month,year);
+  });
 
 /**
 *  On load, called to load the auth2 library and API client library.
@@ -197,6 +200,7 @@ function initClient() {
     updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
     authorizeButton.onclick = handleAuthClick;
     signoutButton.onclick = handleSignoutClick;
+
   });
 }
 
@@ -208,7 +212,9 @@ function updateSigninStatus(isSignedIn) {
   if (isSignedIn) {
     authorizeButton.style.display = 'none';
     signoutButton.style.display = 'block';
-    listUpcomingEvents();
+    drawMonth(month, year);
+    selected = d3.select(getBoxID(date,month,year));
+    selected.each(selectBox);
   } else {
     authorizeButton.style.display = 'block';
     signoutButton.style.display = 'none';
@@ -246,19 +252,20 @@ function appendPre(message) {
 * the authorized user's calendar. If no events are found an
 * appropriate message is printed.
 */
-function listUpcomingEvents() {
+function listUpcomingEvents(firstDayStr, lastDayStr) {
+  console.log(firstDayStr,lastDayStr);
   gapi.client.calendar.events.list({
     'calendarId': 'hayleyptommyc@gmail.com',
-    'timeMin': today.toISOString(),
-    'timeMax': tomorrow.toISOString(),
+    'timeMin': firstDayStr,
+    'timeMax': lastDayStr,
+    //'timeMax': tomorrow.toISOString(),
     'showDeleted': false,
     'singleEvents': true,
-    'maxResults': 10,
+    'maxResults': 50,
     'orderBy': 'startTime'
   }).then(function(response) {
     var events = response.result.items;
-    console.log("running");
-    console.log(events);
+    document.getElementById('content').innerHTML = "";
     appendPre('Upcoming events:');
 
     if (events.length > 0) {
