@@ -152,16 +152,24 @@ function addEventsData() {
   if (eventsList.length > 0) {
     for (i=0;i<eventsList.length;i++) {
       var event = eventsList[i];
-      var when = event.start.dateTime;
-      if (!when) {
-        when = event.start.date;
+      var start = event.start.dateTime;
+      if (!start) {
+        start = event.start.date;
       }
-      var d = when.substring(8,10);
-      for (j=0;j<42;j++) {
-        if (dateBoxData[j]["number"] == d && dateBoxData[j].notCurrent == false) {
-          dateBoxData[j]["events"].push(event);
+      var end = event.end.dateTime;
+      if (!end) {
+        end = event.end.date;
+      }
+      var day1 = parseInt(start.substring(8,10));
+      var dayN = parseInt(end.substring(8,10));
+      do {
+        for (j=0;j<42;j++) {
+          if (dateBoxData[j]["number"] == day1 && dateBoxData[j].notCurrent == false) {
+            dateBoxData[j]["events"].push(event);
+          }
         }
-      }
+        day1 += 1;
+      } while (day1 < dayN);
     }
   }
 }
