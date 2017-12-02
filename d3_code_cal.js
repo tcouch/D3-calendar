@@ -172,6 +172,7 @@ function addEventsData() {
       } while (day1 < dayN);
     }
   }
+  selected.each(selectBox);
 }
 
 function drawMonth(iMonth,iYear) {
