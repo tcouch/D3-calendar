@@ -6,6 +6,7 @@
 
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css?family=Roboto+Slab" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet">
   <script type="text/javascript" src="d3.v4.js"></script>
   <script type="text/javascript" src="secrets.json"></script>
 </head>
@@ -15,10 +16,15 @@
     onreadystatechange="if (this.readyState === 'complete') this.onload()">
   </script>
 <div id="headerBox">
-  <button id="monthPrev">Previous</button>
-  <button id="monthNext">Next</button>
-  <button id="authorize-button" style="display: none;">Authorize</button>
-  <button id="signout-button" style="display: none;">Sign Out</button>
+  <div id="monthNav">
+    <button id="monthPrev" class="navButton"><</button>
+    <div id="monthTitle"><h2>This month</h2></div>
+    <button id="monthNext" class="navButton">></button>
+  </div>
+  <div id="settings">
+    <button id="authorize-button" style="display: none;">Authorize</button>
+    <button id="signout-button" style="display: none;">Sign Out</button>
+  </div>
 </div>
 <div id="detailBox">
   <h3 id="detailName"></h3>

@@ -126,7 +126,7 @@ d3.select("#weekdayLabels").selectAll(".dayOfWeek")
     .append("div")
       .attr("class","dayOfWeek")
       .attr("id",function(d){return d;})
-      .html(function(d){ return d ;});
+      .html(function(d){ return "<p>" + d.substring(0, 2) + "</p>" ;});
 
 function getMonthEvents(iMonth,iYear) {
   var firstDay = new Date(iYear, iMonth, 1);
@@ -151,6 +151,8 @@ function drawMonth(iMonth,iYear) {
         .on("click", selectBox)
         .attr("id",function(d){ return d["ID"]; })
         .html(function(d){ return "<p>"+d["number"]+"</p>";});
+  d3.select("#monthTitle h2")
+    .html(months[iMonth] + " " + iYear);
 }
 
 

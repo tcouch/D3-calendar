@@ -1,6 +1,12 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
 html, body {
   margin: 0;
   height: 100%;
+  font-family: 'Ubuntu', sans-serif;
 }
 
 body {
@@ -8,30 +14,61 @@ body {
   height:480px;
 }
 
+/*<--------------- Header stuff ---------------------------->*/
+
 #headerBox {
   width: 100%;
   height: 60px;
   background-color: #003D4C;
 }
 
+#monthNav {
+  width: 500px;
+  height: 60px;
+  float:left;
+}
+
+#monthTitle {
+  text-align: center;
+  float:left;
+  width:370px;
+  margin: 5px 0px 5px 0px;
+}
+
+#monthTitle h2 {
+  color: #D6D2C4;
+  padding-top: 10px;
+}
+
+#monthPrev {
+  float:left;
+  margin: 5px 5px 5px 10px ;
+}
+
+#monthNext {
+  float:right;
+  margin: 5px 10px 5px 5px;
+}
+
+.navButton {
+  width:50px;
+  height: 50px;
+  background-color: #D6D2C4;
+}
+
+#settings{
+  float:right;
+}
+
+/*------------------ End of Header stuff -------------------*/
+
+/*----------------- Calendar container -------------------*/
+
 #calendarBox {
   width: 500px;
   height: 420px;
   background-color: #003D4C;
   float:left;
-}
-
-#detailBox {
-  width: 300px;
-  height: 420px;
-  background-color: #003D4C;
-  float: right;
-}
-
-#detailBox h3 {
-  color: WhiteSmoke;
-  margin: 0px;
-  padding: 10px 0px 0px 10px;
 }
 
 #weekdayLabels {
@@ -44,17 +81,16 @@ body {
   width: 60px;
   height: 20px;
   float: left;
-  background-color: blue;
+  background-color: #003D4C;
   margin: 2px 5px 5px 5px;
-  font-family: 'Roboto Slab', serif;
-  font-size: 10px;
-  color: white;
+  font-family: 'Ubuntu', sans-serif;
+  color: #D6D2C4;
+  padding-top: 0px;
   text-align: center;
-  padding-top: 5px;
 }
 
 #Saturday, #Sunday {
-  background-color: red;
+  background-color: #003D4C;
 }
 
 #monthLayout {
@@ -65,8 +101,10 @@ body {
   width: 60px;
   height: 60px;
   float:left;
-  background-color: lightBlue;
+  background-color: #AC145A;
   margin: 2px 5px 2px 5px;
+  font-family: 'Ubuntu', sans-serif;
+  color: #D6D2C4;
 }
 
 .dateBox p {
@@ -75,22 +113,43 @@ body {
 }
 
 .Saturday, .Sunday {
-  background-color: pink;
+  background-color: #AC145A;
 }
 
 .dateBox.notCurrent {
-  background-color: WhiteSmoke;
+  background-color: #003D4C;
+  color: #003D4C;
 }
 
 .Saturday.notCurrent, .Sunday.notCurrent {
-  background-color: LightGrey;
+  background-color: #003D4C;
+  color: #003D4C;
 }
-
-
 
 .selected {
   border-style: solid;
   border-width: 2px;
-  border-color: violet;
+  border-color: #8F993E;
   margin: 0px 3px 0px 3px;
 }
+
+/*-------------------- End of calendar container ---------*/
+
+/*----------- Detail box styles ---------------------*/
+
+#detailBox {
+  width: 300px;
+  height: 420px;
+  background-color: #003D4C;
+  float: right;
+  font-family: 'Ubuntu', sans-serif;
+  color: #D6D2C4;
+}
+
+#detailBox h3 {
+  color: #D6D2C4;
+  margin-bottom: 5px;
+}
+
+
+/*-------------- End of detail box styles ----------------*/
