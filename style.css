@@ -103,7 +103,6 @@ body {
   float:left;
   background-color: #AC145A;
   margin: 2px 5px 2px 5px;
-  font-family: 'Ubuntu', sans-serif;
   color: #D6D2C4;
 }
 
@@ -148,7 +147,14 @@ body {
 
 #detailBox h3 {
   color: #D6D2C4;
-  margin-bottom: 5px;
+  margin-bottom: 8px;
+}
+
+.eventSummary {
+  background-color: #AC145A;
+  width: 280px;
+  padding: 5px;
+  margin-top: 5px;
 }
 
 

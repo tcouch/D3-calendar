@@ -13,8 +13,9 @@ var today = new Date();
 var date = today.getDate(),
     month = today.getMonth(),
     year = today.getFullYear();
-var tomorrow = new Date(year,month,date+1);
 var selected;
+var eventsList;
+var dateBoxData;
 
 // Get Client ID and API key from secrets.json
 var secrets = JSON.parse(secrets);
@@ -106,6 +107,7 @@ function makeDaysArray(iMonth, iYear){
                              + daysArray[i]["number"] + daysArray[i]["suffix"]
                              + " " + daysArray[i]["monthName"] + " "
                              + daysArray[i]["year"];
+    daysArray[i]["events"] = [];
   }
   return daysArray;
 }
@@ -117,6 +119,13 @@ function selectBox() {
   selected.data = selected.datum();
   d3.select("#detailName")
     .html(function(){ return selected.data["longName"];});
+  d3.selectAll(".eventSummary").remove();
+  d3.select("#daysEvents").selectAll(".eventSummary")
+    .data(selected.data.events)
+    .enter()
+      .append("div")
+      .attr("class","eventSummary")
+      .html(function(d){ return d.summary ;});
 }
 
 // create the calendar
@@ -126,7 +135,7 @@ d3.select("#weekdayLabels").selectAll(".dayOfWeek")
     .append("div")
       .attr("class","dayOfWeek")
       .attr("id",function(d){return d;})
-      .html(function(d){ return "<p>" + d.substring(0, 2) + "</p>" ;});
+      .html(function(d){ return "<h3>" + d.substring(0, 2) + "</h3>" ;});
 
 function getMonthEvents(iMonth,iYear) {
   var firstDay = new Date(iYear, iMonth, 1);
@@ -134,12 +143,31 @@ function getMonthEvents(iMonth,iYear) {
   var lastDay = new Date(iYear, iMonth, nDays);
   var firstDayStr = firstDay.toISOString();
   var lastDayStr = lastDay.toISOString();
-  listUpcomingEvents(firstDayStr, lastDayStr);
+  console.log('calling update...')
+  updateEventsList(firstDayStr, lastDayStr, addEventsData);
+}
+
+function addEventsData() {
+  console.log('running addEventsData');
+  if (eventsList.length > 0) {
+    for (i=0;i<eventsList.length;i++) {
+      var event = eventsList[i];
+      var when = event.start.dateTime;
+      if (!when) {
+        when = event.start.date;
+      }
+      var d = when.substring(8,10);
+      for (j=0;j<42;j++) {
+        if (dateBoxData[j]["number"] == d && dateBoxData[j].notCurrent == false) {
+          dateBoxData[j]["events"].push(event);
+        }
+      }
+    }
+  }
 }
 
 function drawMonth(iMonth,iYear) {
-  var dateBoxData = makeDaysArray(iMonth, iYear);
-  getMonthEvents(iMonth, iYear);
+  dateBoxData = makeDaysArray(iMonth, iYear);
   d3.select("#monthLayout").selectAll(".dateBox")
     .data(dateBoxData)
     .enter()
@@ -163,6 +191,7 @@ d3.select("#monthPrev")
     year = prevMonthLastDay.getFullYear();
     d3.selectAll(".dateBox").remove();
     drawMonth(month,year);
+    getMonthEvents(month,year);
   });
 
 d3.select("#monthNext")
@@ -172,6 +201,7 @@ d3.select("#monthNext")
     year = nextMonthDate.getFullYear();
     d3.selectAll(".dateBox").remove();
     drawMonth(month,year);
+    getMonthEvents(month,year);
   });
 
 /**
@@ -194,7 +224,6 @@ function initClient() {
     discoveryDocs: DISCOVERY_DOCS,
     scope: SCOPES
   }).then(function() {
-    console.log("promised");
     // Listen for sign-in state changes.
     gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
 
@@ -217,6 +246,7 @@ function updateSigninStatus(isSignedIn) {
     drawMonth(month, year);
     selected = d3.select(getBoxID(date,month,year));
     selected.each(selectBox);
+    getMonthEvents(month, year);
   } else {
     authorizeButton.style.display = 'block';
     signoutButton.style.display = 'none';
@@ -254,35 +284,17 @@ function appendPre(message) {
 * the authorized user's calendar. If no events are found an
 * appropriate message is printed.
 */
-function listUpcomingEvents(firstDayStr, lastDayStr) {
-  console.log(firstDayStr,lastDayStr);
+function updateEventsList(firstDayStr, lastDayStr, _callback) {
   gapi.client.calendar.events.list({
     'calendarId': 'hayleyptommyc@gmail.com',
     'timeMin': firstDayStr,
     'timeMax': lastDayStr,
-    //'timeMax': tomorrow.toISOString(),
     'showDeleted': false,
     'singleEvents': true,
     'maxResults': 50,
     'orderBy': 'startTime'
   }).then(function(response) {
-    var events = response.result.items;
-    document.getElementById('content').innerHTML = "";
-    appendPre('Upcoming events:');
-
-    if (events.length > 0) {
-      for (i = 0; i < events.length; i++) {
-        var event = events[i];
-        var when = event.start.dateTime;
-        if (!when) {
-          when = event.start.date;
-        }
-        appendPre(event.summary + ' (' + when + ')')
-      }
-    } else {
-      appendPre('No upcoming events found.');
-    }
-  });
+    eventsList = response.result.items;
+    _callback();
+  }, console.log('Events list update unfulfilled'));
 }
-
-localStorage.setItem('thing1','[1,2,3,4,5]');
