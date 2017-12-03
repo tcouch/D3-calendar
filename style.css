@@ -164,6 +164,12 @@ body {
   cursor: pointer;
 }
 
+.locDesc {
+  font-style: italic;
+  font-size: 15px;
+  margin-top: 10px;
+}
+
 .clsBtn {
   width: 20px;
   height: 20px;

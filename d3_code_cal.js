@@ -127,14 +127,27 @@ function selectEvent() {
       .attr("class","clsBtn")
       .html("X")
       .on("click",unSelectEvent);
+  if (thisEvent.datum().hasOwnProperty('location')) {
+    thisEvent.append("p")
+      .attr("class","locDesc")
+      .html(thisEvent.datum().location);
+  };
 }
 
 function unSelectEvent() {
   event.stopPropagation();
+  var thisEvent = d3.select(this);
   d3.select(".clsBtn").remove();
-  d3.selectAll(".eventSummary")
-      .attr("style", null)
-      .on("click",selectEvent);
+  thisEvent.transition()
+            .duration(0)
+            .style("height","20px")
+            .style("background-color","#AC145A")
+            .on("end", function(d){
+                d3.selectAll(".eventSummary")
+                  .attr("style", null)
+                  .on("click",selectEvent)
+                  .selectAll("p").remove();
+                  });
 }
 
 function selectBox() {
@@ -150,7 +163,7 @@ function selectBox() {
     .enter()
       .append("div")
       .attr("class","eventSummary")
-      .html(function(d){ return "<p>" + d.summary + "</p>";})
+      .html(function(d){ return "<h4>" + d.summary + "</h4>";})
       .on("click", selectEvent);
 }
 
@@ -170,10 +183,10 @@ function getMonthEvents(iMonth,iYear) {
   var firstDayStr = firstDay.toISOString();
   var lastDayStr = lastDay.toISOString();
   console.log('calling update...')
-  updateEventsList(firstDayStr, lastDayStr, addEventsData);
+  updateEventsList(firstDayStr, lastDayStr, iMonth, iYear, addEventsData);
 }
 
-function addEventsData() {
+function addEventsData(iMonth, iYear) {
   console.log('running addEventsData');
   if (eventsList.length > 0) {
     for (i=0;i<eventsList.length;i++) {
@@ -181,13 +194,19 @@ function addEventsData() {
       var start = event.start.dateTime;
       if (!start) {
         start = event.start.date;
-      }
+      };
       var end = event.end.dateTime;
       if (!end) {
         end = event.end.date;
-      }
+      };
+      var month1 = parseInt(start.substring(5,7)) -1;
+      var monthN = parseInt(end.substring(5,7)) -1;
+      var year1 = parseInt(start.substring(0,4));
+      var yearN = parseInt(end.substring(0,4));
       var day1 = parseInt(start.substring(8,10));
       var dayN = parseInt(end.substring(8,10));
+      if (month1 != iMonth) { day1 = 1; };
+      if (monthN != iMonth) { dayN = daysInMonth(iMonth, iYear) + 1;};
       do {
         for (j=0;j<42;j++) {
           if (dateBoxData[j]["number"] == day1 && dateBoxData[j].notCurrent == false) {
@@ -319,7 +338,7 @@ function appendPre(message) {
 * the authorized user's calendar. If no events are found an
 * appropriate message is printed.
 */
-function updateEventsList(firstDayStr, lastDayStr, _callback) {
+function updateEventsList(firstDayStr, lastDayStr, iMonth, iYear, _callback) {
   gapi.client.calendar.events.list({
     'calendarId': 'hayleyptommyc@gmail.com',
     'timeMin': firstDayStr,
@@ -330,6 +349,6 @@ function updateEventsList(firstDayStr, lastDayStr, _callback) {
     'orderBy': 'startTime'
   }).then(function(response) {
     eventsList = response.result.items;
-    _callback();
+    _callback(iMonth, iYear);
   }, console.log('Events list update unfulfilled'));
 }
