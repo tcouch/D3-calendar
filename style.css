@@ -60,6 +60,15 @@ body {
   cursor: pointer;
 }
 
+.navButton:active {
+  background-color: #D6D2C4;
+  color: #003D4C;
+}
+
+.navButton:focus {
+  outline-color: #8F993E;
+}
+
 #settings{
   float:right;
 }
@@ -167,10 +176,13 @@ body {
   cursor: pointer;
 }
 
-.locDesc {
-  font-style: italic;
+.eventSummary p {
   font-size: 15px;
   margin-top: 10px;
+}
+
+.locDesc {
+  font-style: italic;
 }
 
 .clsBtn {

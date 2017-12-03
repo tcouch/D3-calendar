@@ -132,6 +132,22 @@ function selectEvent() {
       .attr("class","locDesc")
       .html(thisEvent.datum().location);
   };
+  if (thisEvent.datum().start.hasOwnProperty('date')) {
+    thisEvent.append("p")
+      .html("Starts: " + thisEvent.datum().start.date);
+    thisEvent.append("p")
+      .html("Ends: " + thisEvent.datum().end.date);
+  };
+  if (thisEvent.datum().start.hasOwnProperty('dateTime')) {
+    thisEvent.append("p")
+      .html("Starts: " + thisEvent.datum().start.dateTime.substring(11,16));
+    thisEvent.append("p")
+      .html("Ends: " + thisEvent.datum().end.dateTime.substring(11,16));
+  };
+  if (thisEvent.datum().hasOwnProperty('description')) {
+    thisEvent.append("p")
+      .html("Description: <br />" + thisEvent.datum().description);
+  };
 }
 
 function unSelectEvent() {
