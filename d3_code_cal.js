@@ -112,6 +112,30 @@ function makeDaysArray(iMonth, iYear){
   return daysArray;
 }
 
+function selectEvent() {
+  d3.selectAll(".eventSummary")
+      .style("display", "none");
+  var thisEvent = d3.select(this);
+  thisEvent.style("display","block")
+      .transition()
+      .duration(500)
+      .style("background-color","#8F993E")
+      .style("height","370px");
+  thisEvent.on("click",null);
+  thisEvent.insert("div",":first-child")
+      .attr("class","clsBtn")
+      .html("X")
+      .on("click",unSelectEvent);
+}
+
+function unSelectEvent() {
+  event.stopPropagation();
+  d3.select(".clsBtn").remove();
+  d3.selectAll(".eventSummary")
+      .attr("style", null)
+      .on("click",selectEvent);
+}
+
 function selectBox() {
   selected.classed("selected",false);
   selected = d3.select(this);
@@ -125,7 +149,8 @@ function selectBox() {
     .enter()
       .append("div")
       .attr("class","eventSummary")
-      .html(function(d){ return d.summary ;});
+      .html(function(d){ return "<p>" + d.summary + "</p>";})
+      .on("click", selectEvent);
 }
 
 // create the calendar
