@@ -54,6 +54,7 @@ body {
   width:50px;
   height: 50px;
   background-color: #D6D2C4;
+  cursor: pointer;
 }
 
 #settings{
@@ -104,6 +105,7 @@ body {
   background-color: #AC145A;
   margin: 2px 5px 2px 5px;
   color: #D6D2C4;
+  cursor: pointer;
 }
 
 .dateBox p {
@@ -159,6 +161,7 @@ body {
   width: 280px;
   padding: 5px;
   margin-top: 5px;
+  cursor: pointer;
 }
 
 .clsBtn {
@@ -166,6 +169,7 @@ body {
   height: 20px;
   border: 1px black;
   float: right;
+  cursor: pointer;
 }
 
 /*-------------- End of detail box styles ----------------*/
