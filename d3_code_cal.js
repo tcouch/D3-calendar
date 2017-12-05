@@ -150,8 +150,8 @@ function selectEvent() {
   };
 }
 
-function unSelectEvent() {
-  event.stopPropagation();
+function unSelectEvent(event) {
+  d3.event.stopPropagation();
   var thisEvent = d3.select(this);
   d3.select(".clsBtn").remove();
   thisEvent.transition()
