@@ -120,7 +120,7 @@ function selectEvent() {
       .transition()
       .duration(500)
       .style("background-color","#8F993E")
-      .style("height","370px")
+      .style("height","306px")
       .style("cursor","default");
   thisEvent.on("click",null);
   thisEvent.insert("div",":first-child")
