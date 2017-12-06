@@ -72,6 +72,10 @@ body {
   float:right;
 }
 
+.signInOut {
+  margin: 5px 10px 5px 5px;
+}
+
 /*------------------ End of Header stuff -------------------*/
 
 /*----------------- Calendar container -------------------*/
@@ -154,7 +158,7 @@ body {
 /*----------- Detail box styles ---------------------*/
 
 #detailBox {
-  width: 280px;
+  width: 290px;
   height: 410px;
   background-color: #003D4C;
   float: left;
@@ -169,7 +173,7 @@ body {
 
 .eventSummary {
   background-color: #AC145A;
-  width: 270px;
+  width: 280px;
   padding: 5px;
   margin-top: 5px;
   cursor: pointer;
