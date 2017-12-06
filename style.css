@@ -16,7 +16,7 @@ body {
 /*<--------------- Header stuff ---------------------------->*/
 
 #headerBox {
-  width: 790px;
+  width: 780px;
   height: 60px;
   background-color: #003D4C;
 }
@@ -154,8 +154,8 @@ body {
 /*----------- Detail box styles ---------------------*/
 
 #detailBox {
-  width: 290px;
-  height: 420px;
+  width: 280px;
+  height: 410px;
   background-color: #003D4C;
   float: left;
   font-family: 'Ubuntu', sans-serif;
