@@ -120,7 +120,7 @@ function selectEvent() {
       .transition()
       .duration(500)
       .style("background-color","#8F993E")
-      .style("height","370px")
+      .style("height","366px")
       .style("cursor","default");
   thisEvent.on("click",null);
   thisEvent.insert("div",":first-child")
@@ -150,8 +150,8 @@ function selectEvent() {
   };
 }
 
-function unSelectEvent() {
-  event.stopPropagation();
+function unSelectEvent(event) {
+  d3.event.stopPropagation();
   var thisEvent = d3.select(this);
   d3.select(".clsBtn").remove();
   thisEvent.transition()

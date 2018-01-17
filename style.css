@@ -10,14 +10,13 @@ html, body {
 }
 
 body {
-  width:800px;
-  height:480px;
+  background-color: #003D4C;
 }
 
 /*<--------------- Header stuff ---------------------------->*/
 
 #headerBox {
-  width: 100%;
+  width: 785px;
   height: 60px;
   background-color: #003D4C;
 }
@@ -73,13 +72,17 @@ body {
   float:right;
 }
 
+.signInOut {
+  margin: 5px 5px 5px 5px;
+}
+
 /*------------------ End of Header stuff -------------------*/
 
 /*----------------- Calendar container -------------------*/
 
 #calendarBox {
   width: 500px;
-  height: 420px;
+  height: 410px;
   background-color: #003D4C;
   float:left;
 }
@@ -155,22 +158,22 @@ body {
 /*----------- Detail box styles ---------------------*/
 
 #detailBox {
-  width: 300px;
-  height: 420px;
+  width: 285px;
+  height: 410px;
   background-color: #003D4C;
-  float: right;
+  float: left;
   font-family: 'Ubuntu', sans-serif;
   color: #D6D2C4;
 }
 
 #detailBox h3 {
   color: #D6D2C4;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .eventSummary {
   background-color: #AC145A;
-  width: 280px;
+  width: 275px;
   padding: 5px;
   margin-top: 5px;
   cursor: pointer;
