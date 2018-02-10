@@ -145,8 +145,9 @@ function selectEvent() {
       .html("Ends: " + thisEvent.datum().end.dateTime.substring(11,16));
   };
   if (thisEvent.datum().hasOwnProperty('description')) {
-    thisEvent.append("p")
-      .html("Description: <br />" + thisEvent.datum().description);
+    thisEvent.append("div")
+      .attr("class","eventDescription")
+      .html("<p>Description:</p> <p>" + thisEvent.datum().description + "</p>")
   };
 }
 
@@ -162,7 +163,7 @@ function unSelectEvent(event) {
                 d3.selectAll(".eventSummary")
                   .attr("style", null)
                   .on("click",selectEvent)
-                  .selectAll("p").remove();
+                  .selectAll("p, div").remove();
                   });
 }
 

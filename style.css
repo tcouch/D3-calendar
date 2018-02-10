@@ -13,6 +13,25 @@ body {
   background-color: #003D4C;
 }
 
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    background: #D6D2C4;;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: #888;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
 /*<--------------- Header stuff ---------------------------->*/
 
 #headerBox {
@@ -177,7 +196,11 @@ body {
   padding: 5px;
   margin-top: 5px;
   cursor: pointer;
+}
+
+.eventDescription {
   overflow-y: auto;
+  height: 260px;
 }
 
 .eventSummary p {
