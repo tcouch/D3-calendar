@@ -17,6 +17,9 @@ var selected;
 var eventsList;
 var dateBoxData;
 
+// Calendar ID
+var CALENDAR_ID = 'hayleyptommyc@gmail.com'
+
 // Get Client ID and API key from secrets.json
 var secrets = JSON.parse(secrets);
 var CLIENT_ID = secrets.web.client_id;
@@ -350,14 +353,11 @@ function appendPre(message) {
   pre.appendChild(textContent);
 }
 
-/**
-* Print the summary and start datetime/date of the next ten events in
-* the authorized user's calendar. If no events are found an
-* appropriate message is printed.
-*/
+// List all events in the period between firstDayStr and lastDayStr
+
 function updateEventsList(firstDayStr, lastDayStr, iMonth, iYear, _callback) {
   gapi.client.calendar.events.list({
-    'calendarId': 'hayleyptommyc@gmail.com',
+    'calendarId': CALENDAR_ID,
     'timeMin': firstDayStr,
     'timeMax': lastDayStr,
     'showDeleted': false,
