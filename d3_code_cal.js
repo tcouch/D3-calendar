@@ -14,6 +14,7 @@ var date = today.getDate(),
     month = today.getMonth(),
     year = today.getFullYear();
 var selected;
+var currentEvent;
 var eventsList;
 var dateBoxData;
 
@@ -119,45 +120,44 @@ function makeDaysArray(iMonth, iYear){
 function selectEvent() {
   d3.selectAll(".eventSummary")
       .style("display", "none");
-  var thisEvent = d3.select(this);
-  thisEvent.style("display","block")
+  currentEvent = d3.select(this);
+  currentEvent.style("display","block")
       .transition()
       .duration(500)
       .style("background-color","#8F993E")
       .style("height","366px")
       .style("cursor","default");
-  thisEvent.on("click",null);
-  thisEvent.insert("div",":first-child")
+  currentEvent.on("click",null);
+  currentEvent.insert("div",":first-child")
       .attr("class","clsBtn")
       .html("X")
       .on("click",unSelectEvent);
-  thisEvent.insert("div")
+  currentEvent.insert("div")
       .attr("class","delBtn")
       .html("Delete")
       .on("click", questionDelete);
-  if (thisEvent.datum().hasOwnProperty('location')) {
-    thisEvent.append("p")
+  if (currentEvent.datum().hasOwnProperty('location')) {
+    currentEvent.append("p")
       .attr("class","locDesc")
-      .html(thisEvent.datum().location);
+      .html(currentEvent.datum().location);
   };
-  if (thisEvent.datum().start.hasOwnProperty('date')) {
-    thisEvent.append("p")
-      .html("Starts: " + thisEvent.datum().start.date);
-    thisEvent.append("p")
-      .html("Ends: " + thisEvent.datum().end.date);
+  if (currentEvent.datum().start.hasOwnProperty('date')) {
+    currentEvent.append("p")
+      .html("Starts: " + currentEvent.datum().start.date);
+    currentEvent.append("p")
+      .html("Ends: " + currentEvent.datum().end.date);
   };
-  if (thisEvent.datum().start.hasOwnProperty('dateTime')) {
-    thisEvent.append("p")
-      .html("Starts: " + thisEvent.datum().start.dateTime.substring(11,16));
-    thisEvent.append("p")
-      .html("Ends: " + thisEvent.datum().end.dateTime.substring(11,16));
+  if (currentEvent.datum().start.hasOwnProperty('dateTime')) {
+    currentEvent.append("p")
+      .html("Starts: " + currentEvent.datum().start.dateTime.substring(11,16));
+    currentEvent.append("p")
+      .html("Ends: " + currentEvent.datum().end.dateTime.substring(11,16));
   };
-  if (thisEvent.datum().hasOwnProperty('description')) {
-    thisEvent.append("div")
+  if (currentEvent.datum().hasOwnProperty('description')) {
+    currentEvent.append("div")
       .attr("class","eventDescription")
-      .html("<p>Description:</p> <p>" + thisEvent.datum().description + "</p>")
+      .html("<p>Description:</p> <p>" + currentEvent.datum().description + "</p>")
   };
-  console.log(thisEvent.datum().id);
 }
 
 function unSelectEvent(event) {
@@ -180,19 +180,32 @@ function unSelectEvent(event) {
 function questionDelete() {
   var qBox = d3.select("body").append("div").attr("class","yesNo");;
   qBox.html("<h4>Are you sure you want to delete this event?</h4>")
-  var bBox = qBox.append("div").attr("class","btnBox");
+  var bBox = qBox.append("div").attr("class","btnContainer");
   bBox.append("div")
         .html("Yes")
         .on("click",deleteEvent);
   bBox.append("div")
         .html("No")
         .on("click", function(){d3.select(".yesNo").remove();});
-  console.log("Are you sure?");
 }
 
 function deleteEvent() {
   d3.select(".yesNo").remove();
-  console.log("Event deleted");
+  gapi.client.calendar.events.delete({
+    'calendarId': CALENDAR_ID,
+    'eventId': currentEvent.datum().id
+  }).execute(function(response) {
+            if(response.error || response == false){
+                alert('Error');
+            }
+            else{
+              currentEvent.remove();
+              d3.selectAll(".eventSummary")
+                .attr("style",null)
+                .on("click",selectEvent)
+                .selectAll("p, div").remove();
+            }
+    });
 }
 
 function selectBox() {
