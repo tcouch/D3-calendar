@@ -131,6 +131,10 @@ function selectEvent() {
       .attr("class","clsBtn")
       .html("X")
       .on("click",unSelectEvent);
+  thisEvent.insert("div")
+      .attr("class","delBtn")
+      .html("Delete")
+      .on("click", questionDelete);
   if (thisEvent.datum().hasOwnProperty('location')) {
     thisEvent.append("p")
       .attr("class","locDesc")
@@ -153,12 +157,14 @@ function selectEvent() {
       .attr("class","eventDescription")
       .html("<p>Description:</p> <p>" + thisEvent.datum().description + "</p>")
   };
+  console.log(thisEvent.datum().id);
 }
 
 function unSelectEvent(event) {
   d3.event.stopPropagation();
   var thisEvent = d3.select(this);
   d3.select(".clsBtn").remove();
+  d3.select(".delBtn").remove();
   thisEvent.transition()
             .duration(0)
             .style("height","20px")
@@ -169,6 +175,24 @@ function unSelectEvent(event) {
                   .on("click",selectEvent)
                   .selectAll("p, div").remove();
                   });
+}
+
+function questionDelete() {
+  var qBox = d3.select("body").append("div").attr("class","yesNo");;
+  qBox.html("<h4>Are you sure you want to delete this event?</h4>")
+  var bBox = qBox.append("div").attr("class","btnBox");
+  bBox.append("div")
+        .html("Yes")
+        .on("click",deleteEvent);
+  bBox.append("div")
+        .html("No")
+        .on("click", function(){d3.select(".yesNo").remove();});
+  console.log("Are you sure?");
+}
+
+function deleteEvent() {
+  d3.select(".yesNo").remove();
+  console.log("Event deleted");
 }
 
 function selectBox() {
