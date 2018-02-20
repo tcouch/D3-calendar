@@ -155,11 +155,7 @@ body {
 .dateBox.notCurrent {
   background-color: #003D4C;
   color: #003D4C;
-}
-
-.Saturday.notCurrent, .Sunday.notCurrent {
-  background-color: #003D4C;
-  color: #003D4C;
+  pointer-events: none;
 }
 
 .selected {
