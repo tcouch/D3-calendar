@@ -18,13 +18,12 @@ var currentEvent;
 var eventsList;
 var dateBoxData;
 
-// Calendar ID
-var CALENDAR_ID = 'hayleyptommyc@gmail.com'
-
-// Get Client ID and API key from secrets.json
+// Get Client ID and API keys from secrets.json
 var secrets = JSON.parse(secrets);
 var CLIENT_ID = secrets.web.client_id;
-var API_KEY = secrets.api_key;
+var GAPI_KEY = secrets.api_key;
+var CALENDAR_ID = secrets.calendarId;
+var DATAPOINT_KEY = secrets.DP_Key;
 
 // Array of API discovery doc URLs for APIs used by the calendar
 var DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"];
@@ -225,15 +224,6 @@ function selectBox() {
       .on("click", selectEvent);
 }
 
-// create the calendar
-d3.select("#weekdayLabels").selectAll(".dayOfWeek")
-  .data(weekdays)
-  .enter()
-    .append("div")
-      .attr("class","dayOfWeek")
-      .attr("id",function(d){return d;})
-      .html(function(d){ return "<h3>" + d.substring(0, 2) + "</h3>" ;});
-
 function getMonthEvents(iMonth,iYear) {
   var firstDay = new Date(iYear, iMonth, 1);
   var nDays = daysInMonth(iMonth, iYear);
@@ -290,31 +280,10 @@ function drawMonth(iMonth,iYear) {
         .classed("notCurrent", function(d){ return d["notCurrent"]; })
         .on("click", selectBox)
         .attr("id",function(d){ return d["ID"]; })
-        .html(function(d){ return "<p>"+d["number"]+"</p>";});
+        .html(function(d){ return "<div class='dayNumber'>"+d["number"]+"</div>";});
   d3.select("#monthTitle h2")
     .html(months[iMonth] + " " + iYear);
 }
-
-
-d3.select("#monthPrev")
-  .on("click", function(){
-    prevMonthLastDay = new Date(year,month,0);
-    month = prevMonthLastDay.getMonth();
-    year = prevMonthLastDay.getFullYear();
-    d3.selectAll(".dateBox").remove();
-    drawMonth(month,year);
-    getMonthEvents(month,year);
-  });
-
-d3.select("#monthNext")
-  .on("click", function(){
-    nextMonthDate = new Date(year,month,32);
-    month = nextMonthDate.getMonth();
-    year = nextMonthDate.getFullYear();
-    d3.selectAll(".dateBox").remove();
-    drawMonth(month,year);
-    getMonthEvents(month,year);
-  });
 
 /**
 *  On load, called to load the auth2 library and API client library.
@@ -331,7 +300,7 @@ function handleClientLoad() {
 function initClient() {
   console.log("initialising...")
   gapi.client.init({
-    apiKey: API_KEY,
+    apiKey: GAPI_KEY,
     clientId: CLIENT_ID,
     discoveryDocs: DISCOVERY_DOCS,
     scope: SCOPES
@@ -407,3 +376,39 @@ function updateEventsList(firstDayStr, lastDayStr, iMonth, iYear, _callback) {
     _callback(iMonth, iYear);
   }, console.log('Events list update unfulfilled'));
 }
+
+
+// create the calendar
+d3.select("#weekdayLabels").selectAll(".dayOfWeek")
+  .data(weekdays)
+  .enter()
+    .append("div")
+      .attr("class","dayOfWeek")
+      .attr("id",function(d){return d;})
+      .html(function(d){ return "<h3>" + d.substring(0, 2) + "</h3>" ;});
+
+drawMonth(month,year);
+
+d3.select("#monthPrev")
+  .on("click", function(){
+    prevMonthLastDay = new Date(year,month,0);
+    month = prevMonthLastDay.getMonth();
+    year = prevMonthLastDay.getFullYear();
+    d3.selectAll(".dateBox").remove();
+    drawMonth(month,year);
+    if (gapi.auth2.getAuthInstance().isSignedIn.get()) {
+      getMonthEvents(month,year)
+    };
+  });
+
+d3.select("#monthNext")
+  .on("click", function(){
+    nextMonthDate = new Date(year,month,32);
+    month = nextMonthDate.getMonth();
+    year = nextMonthDate.getFullYear();
+    d3.selectAll(".dateBox").remove();
+    drawMonth(month,year);
+    if (gapi.auth2.getAuthInstance().isSignedIn.get()) {
+      getMonthEvents(month,year)
+    };
+  });
