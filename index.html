@@ -12,10 +12,7 @@
   <script type="text/javascript" src="secrets.json"></script>
 </head>
 <body>
-  <script async defer src="https://apis.google.com/js/api.js"
-    onload="this.onload=function(){};handleClientLoad()"
-    onreadystatechange="if (this.readyState === 'complete') this.onload()">
-  </script>
+
 <div id="headerBox">
   <div id="monthNav">
     <button id="monthPrev" class="navButton"><</button>
@@ -35,7 +32,10 @@
   <h3 id="detailName"></h3>
   <div id="daysEvents"></div>
 </div>
-<script src="d3_code_cal.js" charset="utf-8" defer></script>
-<script src="dp_weather.js" charset="utf-8" defer></script>
+<script src="d3_code_cal.js" charset="utf-8"></script>
+<script async defer src="https://apis.google.com/js/api.js"
+  onload="this.onload=function(){};handleClientLoad()"
+  onreadystatechange="if (this.readyState === 'complete') this.onload()">
+</script>
 </body>
 </html>

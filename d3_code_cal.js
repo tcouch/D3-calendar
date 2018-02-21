@@ -69,6 +69,7 @@ function makeDaysArray(iMonth, iYear){
     daysArray[i]["month"] = iMonth;
     daysArray[i]["monthName"] = months[iMonth];
     daysArray[i]["year"] = iYear;
+    daysArray[i]["date"] = new Date(daysArray[i]["year"],daysArray[i]["month"],day);
     daysArray[i]["notCurrent"] = false;
     day += 1;
   }
@@ -79,6 +80,7 @@ function makeDaysArray(iMonth, iYear){
     daysArray[i]["month"] = (iMonth+1)%12;
     daysArray[i]["monthName"] = months[(iMonth+1)%12];
     daysArray[i]["year"] = new Date(iYear,iMonth,32).getFullYear();
+    daysArray[i]["date"] = new Date(daysArray[i]["year"],daysArray[i]["month"],day);
     daysArray[i]["notCurrent"] = true;
     day += 1;
   }
@@ -89,6 +91,7 @@ function makeDaysArray(iMonth, iYear){
     daysArray[i]["month"] = (iMonth-1)%12;
     daysArray[i]["monthName"] = months[(iMonth+11)%12];
     daysArray[i]["year"] = prevMonthYear;
+    daysArray[i]["date"] = new Date(daysArray[i]["year"],daysArray[i]["month"],day);
     daysArray[i]["notCurrent"] = true;
     day += 1;
   }
@@ -112,6 +115,7 @@ function makeDaysArray(iMonth, iYear){
                              + " " + daysArray[i]["monthName"] + " "
                              + daysArray[i]["year"];
     daysArray[i]["events"] = [];
+    daysArray[i]["weather"] = [];
   }
   return daysArray;
 }
@@ -270,6 +274,9 @@ function addEventsData(iMonth, iYear) {
 
 function drawMonth(iMonth,iYear) {
   dateBoxData = makeDaysArray(iMonth, iYear);
+  if (dateBoxData[0]["date"] <= today && today <= dateBoxData[41]["date"]) {
+    console.log("adding weather");
+  };
   d3.select("#monthLayout").selectAll(".dateBox")
     .data(dateBoxData)
     .enter()
@@ -283,6 +290,7 @@ function drawMonth(iMonth,iYear) {
         .html(function(d){ return "<div class='dayNumber'>"+d["number"]+"</div>";});
   d3.select("#monthTitle h2")
     .html(months[iMonth] + " " + iYear);
+
 }
 
 /**
@@ -377,6 +385,27 @@ function updateEventsList(firstDayStr, lastDayStr, iMonth, iYear, _callback) {
   }, console.log('Events list update unfulfilled'));
 }
 
+function addWeather() {
+  console.log("Adding weather");
+  fetch("http://datapoint.metoffice.gov.uk/public/data/val/wxfcs/all/json/3840?res=daily&key=" + DATAPOINT_KEY)
+    .then(function(response) {
+      response.json().then(function(jsonData) {
+        for (var i = 0; i < jsonData.SiteRep.DV.Location.Period.length; i++) {
+          day = jsonData.SiteRep.DV.Location.Period[i].value.substring(8,10);
+          month = jsonData.SiteRep.DV.Location.Period[i].value.substring(5,7)-1;
+          year = jsonData.SiteRep.DV.Location.Period[i].value.substring(0,4);
+          date = new Date(year,month,day);
+          weather = jsonData.SiteRep.DV.Location.Period[i].Rep[0];
+          for (j = 0 ; j < 42; j++) {
+            if (dateBoxData[j]["date"].getTime() === date.getTime()) {
+              dateBoxData[j]["weather"].push(weather);
+            };
+          };
+        };
+      })
+    });
+  console.log(dateBoxData);
+}
 
 // create the calendar
 d3.select("#weekdayLabels").selectAll(".dayOfWeek")
@@ -388,6 +417,7 @@ d3.select("#weekdayLabels").selectAll(".dayOfWeek")
       .html(function(d){ return "<h3>" + d.substring(0, 2) + "</h3>" ;});
 
 drawMonth(month,year);
+addWeather();
 
 d3.select("#monthPrev")
   .on("click", function(){
