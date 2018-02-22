@@ -167,6 +167,12 @@ body {
   margin: 2px 2px 2px 4px;
 }
 
+.weatherDiv {
+  float:right;
+  margin: 2px 2px 2px 2px;
+  text-align: right;
+}
+
 /*.selected {
   border-style: solid;
   border-width: 2px;

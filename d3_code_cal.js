@@ -13,6 +13,7 @@ var today = new Date();
 var date = today.getDate(),
     month = today.getMonth(),
     year = today.getFullYear();
+var forecastLimit = new Date(year,month,date+5);
 var selected;
 var currentEvent;
 var eventsList;
@@ -24,6 +25,9 @@ var CLIENT_ID = secrets.web.client_id;
 var GAPI_KEY = secrets.api_key;
 var CALENDAR_ID = secrets.calendarId;
 var DATAPOINT_KEY = secrets.DP_Key;
+
+// Get weather icon classes from dp2icons.json
+var dp2icons = JSON.parse(dp2icons);
 
 // Array of API discovery doc URLs for APIs used by the calendar
 var DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"];
@@ -272,11 +276,38 @@ function addEventsData(iMonth, iYear) {
   selected.each(selectBox);
 }
 
+function addWeatherData() {
+  console.log("Adding weather");
+  fetch("http://datapoint.metoffice.gov.uk/public/data/val/wxfcs/all/json/324153?res=daily&key=" + DATAPOINT_KEY)
+    .then(function(response) {
+      response.json().then(function(jsonData) {
+        for (var i = 0; i < jsonData.SiteRep.DV.Location.Period.length; i++) {
+          forecastDay = jsonData.SiteRep.DV.Location.Period[i].value.substring(8,10);
+          forecastMonth = jsonData.SiteRep.DV.Location.Period[i].value.substring(5,7)-1;
+          forecastYear = jsonData.SiteRep.DV.Location.Period[i].value.substring(0,4);
+          forecastDate = new Date(forecastYear,forecastMonth,forecastDay);
+          forecast = jsonData.SiteRep.DV.Location.Period[i].Rep[0];
+          for (j = 0 ; j < 42; j++) {
+            if (dateBoxData[j]["date"].getTime() === forecastDate.getTime()) {
+              dateBoxData[j]["weather"].push(forecast);
+              d3.select(".dateBox:nth-child("+(j+1)+")")
+                .append("div")
+                .attr("class","weatherDiv")
+                .html(function(){
+                  console.log(forecast);
+                  return "<p><i class='wi "+dp2icons[forecast["W"]]+"'></i><br />"+forecast["Dm"]+"&deg;C</p>"
+//                  return "<i class='wi-day-sunny'></i>"
+                });
+            };
+          };
+
+        };
+      })
+    });
+}
+
 function drawMonth(iMonth,iYear) {
   dateBoxData = makeDaysArray(iMonth, iYear);
-  if (dateBoxData[0]["date"] <= today && today <= dateBoxData[41]["date"]) {
-    console.log("adding weather");
-  };
   d3.select("#monthLayout").selectAll(".dateBox")
     .data(dateBoxData)
     .enter()
@@ -287,10 +318,14 @@ function drawMonth(iMonth,iYear) {
         .classed("notCurrent", function(d){ return d["notCurrent"]; })
         .on("click", selectBox)
         .attr("id",function(d){ return d["ID"]; })
-        .html(function(d){ return "<div class='dayNumber'>"+d["number"]+"</div>";});
+        .html(function(d){
+          return "<div class='dayNumber'>"+d["number"]+"</div>";
+        });
   d3.select("#monthTitle h2")
     .html(months[iMonth] + " " + iYear);
-
+  if (dateBoxData[0]["date"] <= forecastLimit && today <= dateBoxData[41]["date"]) {
+    addWeatherData();
+  };
 }
 
 /**
@@ -332,9 +367,9 @@ function updateSigninStatus(isSignedIn) {
   if (isSignedIn) {
     authorizeButton.style.display = 'none';
     signoutButton.style.display = 'block';
-    drawMonth(month, year);
-    selected = d3.select(getBoxID(date,month,year));
-    selected.each(selectBox);
+    // drawMonth(month, year);
+    // selected = d3.select(getBoxID(date,month,year));
+    // selected.each(selectBox);
     getMonthEvents(month, year);
   } else {
     authorizeButton.style.display = 'block';
@@ -385,28 +420,6 @@ function updateEventsList(firstDayStr, lastDayStr, iMonth, iYear, _callback) {
   }, console.log('Events list update unfulfilled'));
 }
 
-function addWeather() {
-  console.log("Adding weather");
-  fetch("http://datapoint.metoffice.gov.uk/public/data/val/wxfcs/all/json/3840?res=daily&key=" + DATAPOINT_KEY)
-    .then(function(response) {
-      response.json().then(function(jsonData) {
-        for (var i = 0; i < jsonData.SiteRep.DV.Location.Period.length; i++) {
-          day = jsonData.SiteRep.DV.Location.Period[i].value.substring(8,10);
-          month = jsonData.SiteRep.DV.Location.Period[i].value.substring(5,7)-1;
-          year = jsonData.SiteRep.DV.Location.Period[i].value.substring(0,4);
-          date = new Date(year,month,day);
-          weather = jsonData.SiteRep.DV.Location.Period[i].Rep[0];
-          for (j = 0 ; j < 42; j++) {
-            if (dateBoxData[j]["date"].getTime() === date.getTime()) {
-              dateBoxData[j]["weather"].push(weather);
-            };
-          };
-        };
-      })
-    });
-  console.log(dateBoxData);
-}
-
 // create the calendar
 d3.select("#weekdayLabels").selectAll(".dayOfWeek")
   .data(weekdays)
@@ -417,7 +430,8 @@ d3.select("#weekdayLabels").selectAll(".dayOfWeek")
       .html(function(d){ return "<h3>" + d.substring(0, 2) + "</h3>" ;});
 
 drawMonth(month,year);
-addWeather();
+selected = d3.select(getBoxID(date,month,year));
+selected.each(selectBox);
 
 d3.select("#monthPrev")
   .on("click", function(){
