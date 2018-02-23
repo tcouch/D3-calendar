@@ -420,6 +420,27 @@ function updateEventsList(firstDayStr, lastDayStr, iMonth, iYear, _callback) {
   }, console.log('Events list update unfulfilled'));
 }
 
+function handleMenuClick() {
+  this.classList.toggle("change");
+  var menu = d3.select("#settings-menu")
+  if (menu.classed("showing")) {
+    menu.classed("showing",false);
+  } else {
+    menu.classed("showing",true);
+  };
+  var detailBox = d3.select("#detailBox")
+  if (detailBox.classed("showing")) {
+    detailBox.classed("showing",false);
+  } else {
+    detailBox.classed("showing",true);
+  };
+}
+
+// setup menu button
+d3.select("#settings .menu-icon-container")
+  .on("click", handleMenuClick);
+d3.select("#detailBox").classed("showing",true);
+
 // create the calendar
 d3.select("#weekdayLabels").selectAll(".dayOfWeek")
   .data(weekdays)
