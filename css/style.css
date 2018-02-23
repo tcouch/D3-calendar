@@ -69,6 +69,25 @@ body {
   margin: 5px 10px 5px 5px;
 }
 
+.arrow {
+  border: solid #D6D2C4;
+  border-width: 0px 3px 3px 0px;
+  display: inline-block;
+  padding: 6px;
+}
+
+.right {
+  transform: rotate(-45deg);
+  -webkit-transform: rotate(-45deg);
+  margin-left:-6px;
+}
+
+.left {
+  transform: rotate(135deg);
+  -webkit-transform: rotate(135deg);
+  margin-left: 6px;
+}
+
 .navButton {
   width:50px;
   height: 50px;
