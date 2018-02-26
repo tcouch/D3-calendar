@@ -110,25 +110,50 @@ body {
 #settings{
   float:right;
   border: solid 2px #D6D2C4;
-  margin: 5px 5px 5px 0px;
+  margin: 5px 0px 5px 5px;
   padding: 2px;
 }
 
 .signInOut {
-  margin: 5px 5px 5px 5px;
-  float:right;
-  width:250px;
+  display:none;
+  width: 250px;
+  height: 40px;
+  margin: 60px 0px 5px 10px;
+  background-color: #AC145A;
+  color: #D6D2C4;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.signInOut.showing {
+  display: block;
+}
+
+.signInOut:hover {
   background-color: #D6D2C4;
+  color: #003D4C;
+}
+
+.signInOut:active {
+  background-color: #003D4C;
+  color: #D6D2C4;
+}
+
+.signInOut:focus {
+  outline-color: #8F993E;
 }
 
 #settings-menu {
-  display:none;
+  width: 42px;
+  height: 42px;
+  transition: 0.4s;
 }
 
 #settings-menu.showing {
   display:block;
   width: 270px;
-  height: 470px;
+  height: 400px;
   clear:both;
 }
 

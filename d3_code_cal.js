@@ -37,8 +37,11 @@ var DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/
 //var SCOPES = "https://www.googleapis.com/auth/calendar.readonly";
 var SCOPES = "https://www.googleapis.com/auth/calendar";
 
-var authorizeButton = document.getElementById('authorize-button');
-var signoutButton = document.getElementById('signout-button');
+var authorizeButton = d3.select("#authorize-button");
+var signoutButton = d3.select("#signout-button");
+var settingsMenu = d3.select("#settings-menu");
+var detailBox = d3.select("#detailBox");
+var signedIn;
 
 function daysInMonth(iMonth, iYear)
 {
@@ -216,6 +219,8 @@ function deleteEvent() {
 }
 
 function selectBox() {
+  hideSettings();
+  d3.select("#settings .menu-icon-container").classed("change",false);
   selected.classed("selected",false);
   selected = d3.select(this);
   selected.classed("selected",true);
@@ -353,9 +358,8 @@ function initClient() {
 
     // Handle the initial sign-in state.
     updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
-    authorizeButton.onclick = handleAuthClick;
-    signoutButton.onclick = handleSignoutClick;
-
+    authorizeButton.on("click", handleAuthClick);
+    signoutButton.on("click", handleSignoutClick);
   });
 }
 
@@ -365,29 +369,34 @@ function initClient() {
  */
 function updateSigninStatus(isSignedIn) {
   if (isSignedIn) {
-    authorizeButton.style.display = 'none';
-    signoutButton.style.display = 'block';
-    // drawMonth(month, year);
-    // selected = d3.select(getBoxID(date,month,year));
-    // selected.each(selectBox);
+    signedIn = true;
+    if (settingsMenu.classed("showing")) {
+      authorizeButton.classed("showing",false);
+      signoutButton.classed("showing",true);
+    };
     getMonthEvents(month, year);
   } else {
-    authorizeButton.style.display = 'block';
-    signoutButton.style.display = 'none';
-  }
+    signedIn = false;
+    if (settingsMenu.classed("showing")) {
+      authorizeButton.classed("showing",true);
+      signoutButton.classed("showing",false);
+    };
+  };
 }
 
 /**
  *  Sign in the user upon button click.
  */
-function handleAuthClick(event) {
+function handleAuthClick(d,i) {
+  console.log("signing in")
   gapi.auth2.getAuthInstance().signIn();
 }
 
 /**
 *  Sign out the user upon button click.
 */
-function handleSignoutClick(event) {
+function handleSignoutClick(d,i) {
+  console.log("signing out")
   gapi.auth2.getAuthInstance().signOut();
 }
 
@@ -420,19 +429,31 @@ function updateEventsList(firstDayStr, lastDayStr, iMonth, iYear, _callback) {
   }, console.log('Events list update unfulfilled'));
 }
 
+function hideSettings() {
+  signoutButton.classed("showing",false);
+  authorizeButton.classed("showing",false);
+  detailBox.classed("showing",true);
+  settingsMenu.classed("showing",false);
+}
+
+function showSettings() {
+  settingsMenu.classed("showing",true);
+  setTimeout(function(){
+    detailBox.classed("showing",false);
+    if (signedIn) {
+      signoutButton.classed("showing",true);
+    } else {
+      authorizeButton.classed("showing",true);
+    };
+  },500);
+}
+
 function handleMenuClick() {
   this.classList.toggle("change");
-  var menu = d3.select("#settings-menu")
-  if (menu.classed("showing")) {
-    menu.classed("showing",false);
+  if (settingsMenu.classed("showing")) {
+    hideSettings();
   } else {
-    menu.classed("showing",true);
-  };
-  var detailBox = d3.select("#detailBox")
-  if (detailBox.classed("showing")) {
-    detailBox.classed("showing",false);
-  } else {
-    detailBox.classed("showing",true);
+    showSettings();
   };
 }
 
