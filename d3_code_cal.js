@@ -1,23 +1,21 @@
-//screen dimensions based on Raspberry Pi 7" touchscreen
-var   w = 800,
-      h = 480,
-      square = 60;
-var   weekdayLabelHeight = square/3;
+var square = 60;
+var weekdayLabelHeight = square/3;
 
 var weekdays = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday",
                 "Sunday"];
 var months = ["January","February","March","April","May","June","July",
-              "August","September","October","November","December"]
+              "August","September","October","November","December"];
+var imgSources = [];
 
-var today = new Date();
-var date = today.getDate(),
-    month = today.getMonth(),
-    year = today.getFullYear();
-var forecastLimit = new Date(year,month,date+5);
+var today, date, month, year;
+var forecastLimit;
 var selected;
 var currentEvent;
 var eventsList;
 var dateBoxData;
+var calendarTimer;
+var pageToken;
+var actionBarTimer;
 
 // Get Client ID and API keys from secrets.json
 var secrets = JSON.parse(secrets);
@@ -30,12 +28,13 @@ var DATAPOINT_KEY = secrets.DP_Key;
 var dp2icons = JSON.parse(dp2icons);
 
 // Array of API discovery doc URLs for APIs used by the calendar
-var DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"];
+var DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest",
+                      "https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"];
 
 // Authorization scopes required by the API; multiple scopes can be
 // included, separated by spaces.
 //var SCOPES = "https://www.googleapis.com/auth/calendar.readonly";
-var SCOPES = "https://www.googleapis.com/auth/calendar";
+var SCOPES = "https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/drive";
 
 var authorizeButton = d3.select("#authorize-button");
 var signoutButton = d3.select("#signout-button");
@@ -171,7 +170,6 @@ function selectEvent() {
 }
 
 function unSelectEvent(event) {
-  d3.event.stopPropagation();
   var thisEvent = d3.select(this);
   d3.select(".clsBtn").remove();
   d3.select(".delBtn").remove();
@@ -243,7 +241,6 @@ function getMonthEvents(iMonth,iYear) {
   var lastDay = new Date(iYear, iMonth, nDays);
   var firstDayStr = firstDay.toISOString();
   var lastDayStr = lastDay.toISOString();
-  console.log('calling update...')
   updateEventsList(firstDayStr, lastDayStr, iMonth, iYear, addEventsData);
 }
 
@@ -299,9 +296,7 @@ function addWeatherData() {
                 .append("div")
                 .attr("class","weatherDiv")
                 .html(function(){
-                  console.log(forecast);
                   return "<p><i class='wi "+dp2icons[forecast["W"]]+"'></i><br />"+forecast["Dm"]+"&deg;C</p>"
-//                  return "<i class='wi-day-sunny'></i>"
                 });
             };
           };
@@ -374,6 +369,7 @@ function updateSigninStatus(isSignedIn) {
       authorizeButton.classed("showing",false);
       signoutButton.classed("showing",true);
     };
+    getImageSources();
     getMonthEvents(month, year);
   } else {
     signedIn = false;
@@ -429,6 +425,29 @@ function updateEventsList(firstDayStr, lastDayStr, iMonth, iYear, _callback) {
   }, console.log('Events list update unfulfilled'));
 }
 
+function getImageSources() {
+  gapi.client.drive.files.list({
+    'pageSize': 100,
+    'q': "mimeType='image/jpeg'",
+    'pageToken': pageToken
+  }).then(function(response) {
+    pageToken = response.result.nextPageToken;
+    var files = response.result.files;
+    if (files && files.length > 0) {
+      for (var i = 0; i < files.length; i++) {
+        var file = files[i];
+        //console.log(file.webContentLink);
+        if (file.mimeType == "image/jpeg") {
+          imgSources.push("https://drive.google.com/uc?export=view&id="+file.id)
+        };
+      }
+      prepTenSlides();
+    } else {
+      console.log('No files found.');
+    };
+  });
+}
+
 function hideSettings() {
   signoutButton.classed("showing",false);
   authorizeButton.classed("showing",false);
@@ -457,44 +476,90 @@ function handleMenuClick() {
   };
 }
 
-// setup menu button
-d3.select("#settings .menu-icon-container")
-  .on("click", handleMenuClick);
-d3.select("#detailBox").classed("showing",true);
+function launchCalendar(){
+  // setup menu button
+  d3.select("#settings .menu-icon-container")
+    .on("click", handleMenuClick);
+  d3.select("#detailBox").classed("showing",true);
 
-// create the calendar
-d3.select("#weekdayLabels").selectAll(".dayOfWeek")
-  .data(weekdays)
-  .enter()
-    .append("div")
-      .attr("class","dayOfWeek")
-      .attr("id",function(d){return d;})
-      .html(function(d){ return "<h3>" + d.substring(0, 2) + "</h3>" ;});
+  // weekday labels
+  d3.select("#weekdayLabels").selectAll(".dayOfWeek")
+    .data(weekdays)
+    .enter()
+      .append("div")
+        .attr("class","dayOfWeek")
+        .attr("id",function(d){return d;})
+        .html(function(d){ return "<h3>" + d.substring(0, 2) + "</h3>" ;});
 
-drawMonth(month,year);
-selected = d3.select(getBoxID(date,month,year));
-selected.each(selectBox);
+  // draw this month and select today
+  today = new Date();
+  date = today.getDate();
+  month = today.getMonth();
+  year = today.getFullYear();
+  forecastLimit = new Date(year,month,date+5);
+  drawMonth(month,year);
+  selected = d3.select(getBoxID(date,month,year));
+  selected.each(selectBox);
 
-d3.select("#monthPrev")
-  .on("click", function(){
-    prevMonthLastDay = new Date(year,month,0);
-    month = prevMonthLastDay.getMonth();
-    year = prevMonthLastDay.getFullYear();
-    d3.selectAll(".dateBox").remove();
-    drawMonth(month,year);
-    if (gapi.auth2.getAuthInstance().isSignedIn.get()) {
-      getMonthEvents(month,year)
-    };
-  });
+  // make next/prev buttons work
+  d3.select("#monthPrev")
+    .on("click", function(){
+      prevMonthLastDay = new Date(year,month,0);
+      month = prevMonthLastDay.getMonth();
+      year = prevMonthLastDay.getFullYear();
+      d3.selectAll(".dateBox").remove();
+      drawMonth(month,year);
+      if (gapi.auth2.getAuthInstance().isSignedIn.get()) {
+        getMonthEvents(month,year)
+      };
+    });
+  d3.select("#monthNext")
+    .on("click", function(){
+      nextMonthDate = new Date(year,month,32);
+      month = nextMonthDate.getMonth();
+      year = nextMonthDate.getFullYear();
+      d3.selectAll(".dateBox").remove();
+      drawMonth(month,year);
+      if (gapi.auth2.getAuthInstance().isSignedIn.get()) {
+        getMonthEvents(month,year)
+      };
+    });
+  // clicks on calendar reset timer
+  d3.select("#calendarWrapper")
+    .on("click", function(){
+      console.log("staying alive...")
+      clearTimeout(calendarTimer)
+    });
+}
 
-d3.select("#monthNext")
-  .on("click", function(){
-    nextMonthDate = new Date(year,month,32);
-    month = nextMonthDate.getMonth();
-    year = nextMonthDate.getFullYear();
-    d3.selectAll(".dateBox").remove();
-    drawMonth(month,year);
-    if (gapi.auth2.getAuthInstance().isSignedIn.get()) {
-      getMonthEvents(month,year)
-    };
-  });
+function showActionBar() {
+  d3.select("#actionBar")
+    .classed("showing",true)
+    .on("click",function(){
+      clearTimeout(actionBarTimer);
+      actionBarTimer = setTimeout(function(){
+        d3.select("#actionBar")
+          .classed("showing",false);
+      },5000);
+    });
+  actionBarTimer = setTimeout(function(){
+    d3.select("#actionBar")
+      .classed("showing",false);
+  },5000);
+}
+
+function prepTenSlides() {
+  for (var i=0; i<=10; i++) {
+    d3.select("#carousel")
+      .append("img")
+        .attr("src",imgSources[i])
+        .classed("slide",true)
+        .on("click",showActionBar);
+  }
+}
+
+function launchSlideshow() {
+
+}
+
+launchCalendar();

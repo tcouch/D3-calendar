@@ -347,6 +347,60 @@ body {
 
 /*-------------- End of detail box styles ----------------*/
 
+/*-------------- Slideshow styles ----------------*/
+
+#carousel {
+}
+
+.slide {
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  z-index: 5;
+  display:none;
+}
+
+.slide.showing {
+  display:block;
+}
+
+#actionBar {
+  width:100vw;
+  height:30vh;
+  position:absolute;
+  top:70vh;
+  left:0%;
+  background-color: rgba(0,0,0,0.5);
+  z-index: 6;
+  display:none;
+}
+
+#actionBar.showing {
+  display:block;
+}
+
+#next-slide, #prev-slide {
+  height: 60px;
+  width: 60px;
+  position:absolute;
+  top:50%;
+  margin-top:-30px;
+  background-color: rgb(172,20,90);
+  opacity: 1;
+}
+
+#next-slide {
+  right:20px;
+}
+
+#prev-slide {
+  left:20px;
+}
+
+/*-------------- End of Slideshow styles ----------------*/
+
 /*-------------- Other styles ----------------------------*/
 
 

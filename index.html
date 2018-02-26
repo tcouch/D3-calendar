@@ -13,33 +13,40 @@
   <script type="text/javascript" src="dp2icons.json"></script>
 </head>
 <body>
-
-<div id="headerBox">
-  <div id="monthNav">
-    <button id="monthPrev" class="navButton"><i class="arrow left"></i></button>
-    <div id="monthTitle"><h2></h2></div>
-    <button id="monthNext" class="navButton"><i class="arrow right"></i></button>
-  </div>
-  <div id="settings">
-    <div class="menu-icon-container">
-      <div class="menu-icon-bar1"></div>
-      <div class="menu-icon-bar2"></div>
-      <div class="menu-icon-bar3"></div>
-    </div>
-    <div id="settings-menu">
-      <button id="authorize-button" class="signInOut">Authorize</button>
-      <button id="signout-button" class="signInOut">Sign Out</button>
+  <div id="carousel">
+    <div id="actionBar">
+      <button id="prev-slide">Previous</button>
+      <button id="next-slide">Next</button>
     </div>
   </div>
-</div>
-<div id="calendarBox">
-  <div id="weekdayLabels"></div>
-  <div id="monthLayout"></div>
-</div>
-<div id="detailBox">
-  <h3 id="detailName"></h3>
-  <div id="daysEvents"></div>
-</div>
+  <div id="calendarWrapper">
+    <div id="headerBox">
+      <div id="monthNav">
+        <button id="monthPrev" class="navButton"><i class="arrow left"></i></button>
+        <div id="monthTitle"><h2></h2></div>
+        <button id="monthNext" class="navButton"><i class="arrow right"></i></button>
+      </div>
+      <div id="settings">
+        <div class="menu-icon-container">
+          <div class="menu-icon-bar1"></div>
+          <div class="menu-icon-bar2"></div>
+          <div class="menu-icon-bar3"></div>
+        </div>
+        <div id="settings-menu">
+          <button id="authorize-button" class="signInOut">Authorize</button>
+          <button id="signout-button" class="signInOut">Sign Out</button>
+        </div>
+      </div>
+    </div>
+    <div id="calendarBox">
+      <div id="weekdayLabels"></div>
+      <div id="monthLayout"></div>
+    </div>
+    <div id="detailBox">
+      <h3 id="detailName"></h3>
+      <div id="daysEvents"></div>
+    </div>
+  </div>
 <script src="d3_code_cal.js" charset="utf-8"></script>
 <script async defer src="https://apis.google.com/js/api.js"
   onload="this.onload=function(){};handleClientLoad()"
