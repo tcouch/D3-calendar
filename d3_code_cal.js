@@ -14,8 +14,11 @@ var currentEvent;
 var eventsList;
 var dateBoxData;
 var calendarTimer;
+var slideTimer;
 var pageToken;
 var actionBarTimer;
+var slidePosition = 7;
+var imgCounter = 0;
 
 // Get Client ID and API keys from secrets.json
 var secrets = JSON.parse(secrets);
@@ -35,6 +38,8 @@ var DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/
 // included, separated by spaces.
 //var SCOPES = "https://www.googleapis.com/auth/calendar.readonly";
 var SCOPES = "https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/drive";
+var CALENDAR_KEEP_ALIVE_TIME = 10000;
+var SLIDE_CYCLE_TIME = 20000;
 
 var authorizeButton = d3.select("#authorize-button");
 var signoutButton = d3.select("#signout-button");
@@ -441,7 +446,7 @@ function getImageSources() {
           imgSources.push("https://drive.google.com/uc?export=view&id="+file.id)
         };
       }
-      prepTenSlides();
+      prepElevenSlides();
     } else {
       console.log('No files found.');
     };
@@ -477,6 +482,11 @@ function handleMenuClick() {
 }
 
 function launchCalendar(){
+  // stop slideshow
+  clearTimeout(slideTimer);
+  d3.select("#carousel").classed("showing",false);
+  clearTimeout(actionBarTimer);
+  d3.select("#actionBar").classed("showing",false);
   // setup menu button
   d3.select("#settings .menu-icon-container")
     .on("click", handleMenuClick);
@@ -527,9 +537,26 @@ function launchCalendar(){
   // clicks on calendar reset timer
   d3.select("#calendarWrapper")
     .on("click", function(){
-      console.log("staying alive...")
-      clearTimeout(calendarTimer)
+      console.log("staying alive...");
+      restartCalendarTimer();
     });
+//  start timer for Slideshow
+  restartCalendarTimer();
+}
+
+function restartCalendarTimer(){
+  clearTimeout(calendarTimer);
+  calendarTimer = setTimeout(function(){
+    launchSlideshow();
+  },CALENDAR_KEEP_ALIVE_TIME);
+}
+
+function restartActionBarTimer(){
+  clearTimeout(actionBarTimer);
+  actionBarTimer = setTimeout(function(){
+    d3.select("#actionBar")
+      .classed("showing",false);
+  },5000);
 }
 
 function showActionBar() {
@@ -542,24 +569,106 @@ function showActionBar() {
           .classed("showing",false);
       },5000);
     });
-  actionBarTimer = setTimeout(function(){
-    d3.select("#actionBar")
-      .classed("showing",false);
-  },5000);
+  restartActionBarTimer();
 }
 
-function prepTenSlides() {
+function prepElevenSlides() {
   for (var i=0; i<=10; i++) {
     d3.select("#carousel")
       .append("img")
-        .attr("src",imgSources[i])
+        .attr("src",imgSources[imgCounter])
         .classed("slide",true)
         .on("click",showActionBar);
+    imgCounter++;
+  };
+}
+
+function removeSlide(position) {
+  d3.select("#carousel img:nth-child("+position+")").remove();
+}
+
+function addSlide(end=true) {
+  carousel=d3.select("#carousel");
+  if (end) {
+    carousel.append("img")
+      .attr("src",imgSources[imgCounter])
+      .classed("slide",true)
+      .on("click",showActionBar);
+  } else {
+    var imgNumber = imgCounter - 12;
+    if (imgNumber < 0) {
+      imgNumber = imgNumber + 100;
+    };
+    var numberOfSlides = d3.selectAll(".slide").size();
+    carousel.insert("img",":first-child")
+      .attr("src",imgSources[imgNumber])
+      .classed("slide",true)
+      .on("click",showActionBar);
+  };
+}
+
+function showNextSlide(){
+  removeSlide(1);
+  addSlide();
+  imgCounter++;
+  if (imgCounter>99) {
+    imgCounter=0;
   }
+  if (currentImage) {
+    currentImage.classed("showing",false);
+  }
+  currentImage = d3.select("#carousel img:nth-child("+slidePosition+")");
+  currentImage.classed("showing",true);
+  cycleSlideshow();
+}
+
+function showPreviousSlide(){
+  removeSlide(11);
+  addSlide(end=false)
+  imgCounter--;
+  if (imgCounter<0) {
+    imgCounter=99;
+  };
+  if (currentImage) {
+    currentImage.classed("showing",false);
+  }
+  currentImage = d3.select("#carousel img:nth-child("+slidePosition+")");
+  currentImage.classed("showing",true);
+  cycleSlideshow();
+}
+
+function handleNextSlideClick(){
+  showNextSlide();
+}
+
+function handlePrevSlideClick(){
+  showPreviousSlide();
+}
+
+function handleShowCalendarClick(){
+  launchCalendar();
+}
+
+function cycleSlideshow() {
+  clearTimeout(slideTimer);
+  slideTimer = setTimeout(function () {
+    showNextSlide();
+  },SLIDE_CYCLE_TIME);
 }
 
 function launchSlideshow() {
+  console.log("Launching slide show");
+  d3.select("#carousel").classed("showing",true);
+  currentImage = d3.select("#carousel img:nth-child("+slidePosition+")");
+  currentImage.classed("showing",true);
+  cycleSlideshow();
+}
 
+function setupActionBar() {
+  d3.select("#prev-slide").on("click",handlePrevSlideClick);
+  d3.select("#next-slide").on("click",handleNextSlideClick);
+  d3.select("#show-calendar").on("click",handleShowCalendarClick);
 }
 
 launchCalendar();
+setupActionBar();
