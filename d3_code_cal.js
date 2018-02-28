@@ -20,6 +20,7 @@ var actionBarTimer;
 var slidePosition = 6;
 var imgCounter = 0;
 var todaySummary = {};
+var fiveDayForecast = [{},{},{},{},{}];
 
 // Get Client ID and API keys from secrets.json
 var secrets = JSON.parse(secrets);
@@ -288,6 +289,25 @@ function addEventsData(iMonth, iYear) {
   selected.each(selectBox);
 }
 
+function getFiveDayForecast(){
+  fetch("http://datapoint.metoffice.gov.uk/public/data/val/wxfcs/all/json/324153?res=daily&key=" + DATAPOINT_KEY)
+    .then(function(response) {
+      response.json().then(function(jResponse) {
+        var periods = jResponse.SiteRep.DV.Location.Period;
+        for (var i=0; i<5;i++) {
+          console.log(periods[i]);
+          var fD = periods[i].value.substring(8,10);
+          var fM = periods[i].value.substring(5,7)-1;
+          var fY = periods[i].value.substring(0,4);
+          var forecastDate = new Date(fY,fM,fD);
+          fiveDayForecast[i]["date"] = forecastDate;
+          fiveDayForecast[i]["dayForecast"] = periods[i].Rep[0];
+          fiveDayForecast[i]["nightForecast"] = periods[i].Rep[1];
+        };
+      });
+    });
+}
+
 function addWeatherData() {
   console.log("Adding weather");
   fetch("http://datapoint.metoffice.gov.uk/public/data/val/wxfcs/all/json/324153?res=daily&key=" + DATAPOINT_KEY)
@@ -312,7 +332,7 @@ function addWeatherData() {
           };
 
         };
-      })
+      });
     });
 }
 
@@ -686,6 +706,7 @@ function launchSlideshow() {
   d3.select("#carousel").classed("showing",true);
   currentImage = d3.select("#carousel img:nth-child("+slidePosition+")");
   currentImage.classed("showing",true);
+  setupActionBar();
   cycleSlideshow();
 }
 
@@ -695,8 +716,14 @@ function setupActionBar() {
   d3.select("#show-calendar").on("click",handleShowCalendarClick);
   updateTodaySummary();
   d3.select("#date-info")
-    .html(function(){ return "<h3>" + todaySummary["longName"] + "</h3>" });
+    .html(function(){ return "<p>" + todaySummary["longName"] + "</p>" });
+  d3.select("#weather-info")
+    .html(function(){ return "<p><i class='wi "
+                      + dp2icons[fiveDayForecast[0]["dayForecast"]["W"]]
+                      + "'></i> "
+                      + fiveDayForecast[0]["dayForecast"]["Dm"]
+                      +"&deg;C</p>"});
 }
 
 launchCalendar();
-setupActionBar();
+getFiveDayForecast();

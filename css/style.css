@@ -302,6 +302,10 @@ body {
   display:block;
 }
 
+#detailName {
+  text-align: right;
+}
+
 .eventSummary {
   background-color: #AC145A;
   width: 275px;
@@ -398,6 +402,7 @@ body {
   clear:both;
   margin-left: 50px;
   margin-right: 50px;
+  margin-top: 100px;
 }
 
 #next-slide, #prev-slide {
@@ -406,6 +411,8 @@ body {
   width: 60px;
   background-color: rgb(172,20,90);
   opacity: 1;
+  cursor: pointer;
+  border: none;
 }
 
 #next-slide {
@@ -422,9 +429,11 @@ body {
   height:60px;
   width: 200px;
   float:right;
-  margin-right: 50px;
+  margin-right: 0px;
   background-color: rgb(172,20,90);
   opacity: 1;
+  cursor: pointer;
+  border: none;
 }
 
 #date-info {
@@ -434,6 +443,17 @@ body {
   color: #D6D2C4;
   margin-left: 50px;
   padding-top: 20px;
+  font-size: 30px;
+}
+
+#weather-info {
+  height:60px;
+  width:25$;
+  float:right;
+  color: #D6D2C4;
+  margin-right: 50px;
+  padding-top: 20px;
+  font-size: 30px;
 }
 
 /*-------------- End of Slideshow styles ----------------*/
