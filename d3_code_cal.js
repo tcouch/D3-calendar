@@ -17,8 +17,9 @@ var calendarTimer;
 var slideTimer;
 var pageToken;
 var actionBarTimer;
-var slidePosition = 7;
+var slidePosition = 6;
 var imgCounter = 0;
+var todaySummary = {};
 
 // Get Client ID and API keys from secrets.json
 var secrets = JSON.parse(secrets);
@@ -67,6 +68,21 @@ function getBoxID(iDate, iMonth, iYear){
   return "#box" + boxNumber;
 }
 
+function getDateSuffix(iDate){
+  if ([1,21,31].indexOf(iDate) != -1 ) {
+    return "st";
+  }
+  else if ([2,22].indexOf(iDate) != -1 ) {
+    return "nd";
+  }
+  else if ([3,23].indexOf(iDate) != -1 ) {
+    return "rd";
+  }
+  else {
+    return "th";
+  }
+}
+
 function makeDaysArray(iMonth, iYear){
   var daysArray = new Array(42);
   var monthLength = daysInMonth(iMonth, iYear);
@@ -109,18 +125,7 @@ function makeDaysArray(iMonth, iYear){
   for (i=0; i<42; i++) {
     daysArray[i]["dayName"] = weekdays[i%7];
     daysArray[i]["ID"] = "box"+i;
-    if ([1,21,31].indexOf(daysArray[i]["number"]) != -1 ) {
-      daysArray[i]["suffix"] = "st";
-    }
-    else if ([2,22].indexOf(daysArray[i]["number"]) != -1 ) {
-      daysArray[i]["suffix"] = "nd";
-    }
-    else if ([3,23].indexOf(daysArray[i]["number"]) != -1 ) {
-      daysArray[i]["suffix"] = "rd";
-    }
-    else {
-      daysArray[i]["suffix"] = "th";
-    }
+    daysArray[i]["suffix"] = getDateSuffix(daysArray[i]["number"]);
     daysArray[i]["longName"] = daysArray[i]["dayName"] + " "
                              + daysArray[i]["number"] + daysArray[i]["suffix"]
                              + " " + daysArray[i]["monthName"] + " "
@@ -481,6 +486,26 @@ function handleMenuClick() {
   };
 }
 
+function updateDateSummary(dateObject,summary){
+  summary["date"] = dateObject.getDate();
+  summary["month"] = dateObject.getMonth();
+  summary["year"] = dateObject.getFullYear();
+  summary["dayName"] = weekdays[(dateObject.getDay()-1)%7];
+  summary["monthName"] = months[summary["month"]];
+  summary["shortDate"] = summary["date"] + "/" + summary["month"] + "/"
+                          + summary["year"].toString().substring(2);
+  summary["longName"] =  summary["dayName"] + " "
+                           + summary["date"] + getDateSuffix(summary["date"])
+                           + " " + summary["monthName"] + " "
+                           + summary["year"];
+  summary["lastUpdate"] = new Date();
+}
+
+function updateTodaySummary(){
+  d = new Date();
+  updateDateSummary(d,todaySummary);
+}
+
 function launchCalendar(){
   // stop slideshow
   clearTimeout(slideTimer);
@@ -507,6 +532,7 @@ function launchCalendar(){
   month = today.getMonth();
   year = today.getFullYear();
   forecastLimit = new Date(year,month,date+5);
+  d3.selectAll(".dateBox").remove();
   drawMonth(month,year);
   selected = d3.select(getBoxID(date,month,year));
   selected.each(selectBox);
@@ -599,7 +625,6 @@ function addSlide(end=true) {
     if (imgNumber < 0) {
       imgNumber = imgNumber + 100;
     };
-    var numberOfSlides = d3.selectAll(".slide").size();
     carousel.insert("img",":first-child")
       .attr("src",imgSources[imgNumber])
       .classed("slide",true)
@@ -668,6 +693,9 @@ function setupActionBar() {
   d3.select("#prev-slide").on("click",handlePrevSlideClick);
   d3.select("#next-slide").on("click",handleNextSlideClick);
   d3.select("#show-calendar").on("click",handleShowCalendarClick);
+  updateTodaySummary();
+  d3.select("#date-info")
+    .html(function(){ return "<h3>" + todaySummary["longName"] + "</h3>" });
 }
 
 launchCalendar();
