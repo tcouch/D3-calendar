@@ -262,14 +262,22 @@ body {
 
 .dayNumber {
   float:left;
-  margin: 2px 2px 2px 4px;
+  margin: 5px 2px 2px 5px;
 }
 
-.weatherDiv {
+.wt {
   float:right;
-  margin: 2px 2px 2px 2px;
-  text-align: right;
+  margin: 5px 3px 0px 0px;
+  text-align: center;
   font-size: 12px;
+}
+
+.wt p {
+  margin-bottom: 2px;
+}
+
+.wt i {
+  font-size: 20px;
 }
 
 /*.selected {
@@ -348,6 +356,16 @@ body {
   right: 5px;
   bottom: 5px;
 }
+
+#weather {
+  font-size: 15px;
+  text-align: right;
+}
+
+#weather i, #weather .Dm {
+  font-size: 20px;
+}
+
 
 /*-------------- End of detail box styles ----------------*/
 

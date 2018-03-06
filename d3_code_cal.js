@@ -20,7 +20,7 @@ var actionBarTimer;
 var slidePosition = 6;
 var imgCounter = 0;
 var todaySummary = {};
-var fiveDayForecast = [{},{},{},{},{}];
+var forecast = [{},{},{},{},{}];
 
 // Get Client ID and API keys from secrets.json
 var secrets = JSON.parse(secrets);
@@ -28,6 +28,8 @@ var CLIENT_ID = secrets.web.client_id;
 var GAPI_KEY = secrets.api_key;
 var CALENDAR_ID = secrets.calendarId;
 var DATAPOINT_KEY = secrets.DP_Key;
+var DATAPOINT_BASE = "http://datapoint.metoffice.gov.uk/public/data/val/wxfcs/all/json/";
+var DATAPOINT_LOCATION_ID = "324153";
 
 // Get weather icon classes from dp2icons.json
 var dp2icons = JSON.parse(dp2icons);
@@ -132,7 +134,7 @@ function makeDaysArray(iMonth, iYear){
                              + " " + daysArray[i]["monthName"] + " "
                              + daysArray[i]["year"];
     daysArray[i]["events"] = [];
-    daysArray[i]["weather"] = [];
+    daysArray[i]["forecast"] = {};
   }
   return daysArray;
 }
@@ -236,6 +238,28 @@ function selectBox() {
   selected.data = selected.datum();
   d3.select("#detailName")
     .html(function(){ return selected.data["longName"];});
+  // Add weather summary if there is one
+  d3.select("#weather").html("");
+  if (selected.data.hasOwnProperty("dailyForecast")){
+    d3.select("#weather").html(function(){
+      return "<p><i class='wi "
+        + dp2icons[selected.data.dailyForecast.W]
+        + "'></i>&ensp;"
+        + "<span class='Dm'>" + selected.data.dailyForecast.Dm + "</span>"
+        + "<i class='wi wi-celsius'></i>&ensp;"
+        + " <i class='wi wi-umbrella'></i> "
+        + selected.data.dailyForecast.PPd
+        + "%&ensp;"
+        + "<i class='wi wi-wind wi-from-"
+        + selected.data.dailyForecast.D.toLowerCase()
+        + "'></i> "
+        + selected.data.dailyForecast.S
+        + "mph&ensp;"
+        + "<i class='wi wi-humidity'></i> "
+        + selected.data.dailyForecast.Hn
+        + "%"
+        +"</p>";});
+  };
   d3.selectAll(".eventSummary").remove();
   d3.select("#daysEvents").selectAll(".eventSummary")
     .data(selected.data.events)
@@ -289,51 +313,59 @@ function addEventsData(iMonth, iYear) {
   selected.each(selectBox);
 }
 
-function getFiveDayForecast(){
-  fetch("http://datapoint.metoffice.gov.uk/public/data/val/wxfcs/all/json/324153?res=daily&key=" + DATAPOINT_KEY)
+function getDailyForecast(){
+  var forecastType = "daily";
+  query = DATAPOINT_BASE + DATAPOINT_LOCATION_ID + "?res=" + forecastType + "&key=" + DATAPOINT_KEY;
+  fetch(query)
     .then(function(response) {
       response.json().then(function(jResponse) {
         var periods = jResponse.SiteRep.DV.Location.Period;
-        for (var i=0; i<5;i++) {
-          console.log(periods[i]);
-          var fD = periods[i].value.substring(8,10);
-          var fM = periods[i].value.substring(5,7)-1;
-          var fY = periods[i].value.substring(0,4);
-          var forecastDate = new Date(fY,fM,fD);
-          fiveDayForecast[i]["date"] = forecastDate;
-          fiveDayForecast[i]["dayForecast"] = periods[i].Rep[0];
-          fiveDayForecast[i]["nightForecast"] = periods[i].Rep[1];
+        for (var i=0; i<5; i++) {
+          forecast[i]["date"] = new Date(periods[i].value);
+          forecast[i]["day"] = periods[i].Rep[0];
+          forecast[i]["night"] = periods[i].Rep[1];
         };
+        addDailyForecastSymbols();
       });
     });
 }
 
-function addWeatherData() {
-  console.log("Adding weather");
-  fetch("http://datapoint.metoffice.gov.uk/public/data/val/wxfcs/all/json/324153?res=daily&key=" + DATAPOINT_KEY)
+function getHourlyForecast(){
+  var forecastType = "3hourly";
+  query = DATAPOINT_BASE + DATAPOINT_LOCATION_ID + "?res=" + forecastType + "&key=" + DATAPOINT_KEY;
+  fetch(query)
     .then(function(response) {
-      response.json().then(function(jsonData) {
-        for (var i = 0; i < jsonData.SiteRep.DV.Location.Period.length; i++) {
-          forecastDay = jsonData.SiteRep.DV.Location.Period[i].value.substring(8,10);
-          forecastMonth = jsonData.SiteRep.DV.Location.Period[i].value.substring(5,7)-1;
-          forecastYear = jsonData.SiteRep.DV.Location.Period[i].value.substring(0,4);
-          forecastDate = new Date(forecastYear,forecastMonth,forecastDay);
-          forecast = jsonData.SiteRep.DV.Location.Period[i].Rep[0];
-          for (j = 0 ; j < 42; j++) {
-            if (dateBoxData[j]["date"].getTime() === forecastDate.getTime()) {
-              dateBoxData[j]["weather"].push(forecast);
-              d3.select(".dateBox:nth-child("+(j+1)+")")
-                .append("div")
-                .attr("class","weatherDiv")
-                .html(function(){
-                  return "<p><i class='wi "+dp2icons[forecast["W"]]+"'></i><br />"+forecast["Dm"]+"&deg;C</p>"
-                });
-            };
-          };
-
+      response.json().then(function(jResponse) {
+        var periods = jResponse.SiteRep.DV.Location.Period;
+        for (var i=0; i<5; i++) {
+          forecast[i]["date"] = new Date(periods[i].value);
+          forecast[i]["hourly"] = periods[i].Rep;
         };
+        addForecastData();
       });
     });
+}
+
+function addDailyForecastSymbols() {
+  for (var i=0; i<5; i++) {
+    for (j = 0 ; j < 42; j++) {
+      if (dateBoxData[j].date.getTime() === forecast[i].date.getTime()) {
+        console.log("Adding forecast to: " + dateBoxData[j].date)
+        dateBoxData[j]["dailyForecast"] = forecast[i].day;
+      };
+    };
+  };
+  d3.selectAll(".dateBox")
+    .append("div")
+      .classed("wt",true)
+      .html(function(d){
+        if (d.hasOwnProperty("dailyForecast")) {
+          return "<p><i class='wi "
+                            + dp2icons[d.dailyForecast.W]
+                            + "'></i></p><p> "
+                            + d.dailyForecast.Dm
+                            +"&deg;C</p>"};
+      });
 }
 
 function drawMonth(iMonth,iYear) {
@@ -354,7 +386,11 @@ function drawMonth(iMonth,iYear) {
   d3.select("#monthTitle h2")
     .html(months[iMonth] + " " + iYear);
   if (dateBoxData[0]["date"] <= forecastLimit && today <= dateBoxData[41]["date"]) {
-    addWeatherData();
+    if (forecast[0].hasOwnProperty("daily")) {
+      addDailyForecastSymbols();
+    }else{
+      getDailyForecast();
+    };
   };
 }
 
@@ -529,6 +565,7 @@ function updateTodaySummary(){
 function launchCalendar(){
   // stop slideshow
   clearTimeout(slideTimer);
+  clearTimeout(actionBarTimer);
   d3.select("#carousel").classed("showing",false);
   clearTimeout(actionBarTimer);
   d3.select("#actionBar").classed("showing",false);
@@ -583,7 +620,6 @@ function launchCalendar(){
   // clicks on calendar reset timer
   d3.select("#calendarWrapper")
     .on("click", function(){
-      console.log("staying alive...");
       restartCalendarTimer();
     });
 //  start timer for Slideshow
@@ -598,23 +634,21 @@ function restartCalendarTimer(){
 }
 
 function restartActionBarTimer(){
-  clearTimeout(actionBarTimer);
+  if (actionBarTimer) {
+    clearTimeout(actionBarTimer);
+  }
   actionBarTimer = setTimeout(function(){
+    document.querySelector("#carousel").style.cursor = 'none';
     d3.select("#actionBar")
       .classed("showing",false);
   },5000);
 }
 
 function showActionBar() {
+  document.querySelector("#carousel").style.cursor = 'default';
   d3.select("#actionBar")
     .classed("showing",true)
-    .on("click",function(){
-      clearTimeout(actionBarTimer);
-      actionBarTimer = setTimeout(function(){
-        d3.select("#actionBar")
-          .classed("showing",false);
-      },5000);
-    });
+    .on("click",restartActionBarTimer);
   restartActionBarTimer();
 }
 
@@ -623,8 +657,7 @@ function prepElevenSlides() {
     d3.select("#carousel")
       .append("img")
         .attr("src",imgSources[imgCounter])
-        .classed("slide",true)
-        .on("click",showActionBar);
+        .classed("slide",true);
     imgCounter++;
   };
 }
@@ -647,8 +680,7 @@ function addSlide(end=true) {
     };
     carousel.insert("img",":first-child")
       .attr("src",imgSources[imgNumber])
-      .classed("slide",true)
-      .on("click",showActionBar);
+      .classed("slide",true);
   };
 }
 
@@ -703,9 +735,12 @@ function cycleSlideshow() {
 
 function launchSlideshow() {
   console.log("Launching slide show");
-  d3.select("#carousel").classed("showing",true);
+  d3.select("#carousel")
+    .classed("showing",true)
+    .on("click",showActionBar);
   currentImage = d3.select("#carousel img:nth-child("+slidePosition+")");
   currentImage.classed("showing",true);
+  document.querySelector("#carousel").style.cursor = 'none';
   setupActionBar();
   cycleSlideshow();
 }
@@ -719,11 +754,10 @@ function setupActionBar() {
     .html(function(){ return "<p>" + todaySummary["longName"] + "</p>" });
   d3.select("#weather-info")
     .html(function(){ return "<p><i class='wi "
-                      + dp2icons[fiveDayForecast[0]["dayForecast"]["W"]]
+                      + dp2icons[forecast[0]["day"]["W"]]
                       + "'></i> "
-                      + fiveDayForecast[0]["dayForecast"]["Dm"]
+                      + forecast[0]["day"]["Dm"]
                       +"&deg;C</p>"});
 }
 
 launchCalendar();
-getFiveDayForecast();
