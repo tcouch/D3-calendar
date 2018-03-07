@@ -149,13 +149,7 @@ function makeDaysArray(iMonth, iYear){
   return daysArray;
 }
 
-function selectEvent() {
-  currentEvent = d3.select(this);
-  currentEvent.classed("selected",true);
-//  d3.select("#weather").classed("showing",false);
-  d3.selectAll(".eventSummary").filter(":not(.selected)").transition()
-    .duration(500)
-    .style("top","500px");
+function expandEvent(currentEvent){
   currentEvent.transition().duration(500)
     .style("top", function(){
       if (d3.select("#weather").classed("showing")){
@@ -166,38 +160,49 @@ function selectEvent() {
     })
     .style("height","333px")
     .style("background-color","#8F993E")
-    .style("cursor","default");
+    .style("cursor","default")
+    .on("end",function(){
+      currentEvent.insert("div",":first-child")
+          .attr("class","clsBtn")
+          .html("X")
+          .on("click",unSelectEvent);
+      currentEvent.insert("div")
+          .attr("class","delBtn")
+          .html("Delete")
+          .on("click", questionDelete);
+      if (currentEvent.datum().hasOwnProperty('location')) {
+        currentEvent.append("p")
+          .attr("class","locDesc")
+          .html(currentEvent.datum().location);
+      };
+      if (currentEvent.datum().start.hasOwnProperty('date')) {
+        currentEvent.append("p")
+          .html("Starts: " + currentEvent.datum().start.date);
+        currentEvent.append("p")
+          .html("Ends: " + currentEvent.datum().end.date);
+      };
+      if (currentEvent.datum().start.hasOwnProperty('dateTime')) {
+        currentEvent.append("p")
+          .html("Starts: " + currentEvent.datum().start.dateTime.substring(11,16));
+        currentEvent.append("p")
+          .html("Ends: " + currentEvent.datum().end.dateTime.substring(11,16));
+      };
+      if (currentEvent.datum().hasOwnProperty('description')) {
+        currentEvent.append("div")
+          .attr("class","eventDescription")
+          .html("<p>Description:</p> <p>" + currentEvent.datum().description + "</p>")
+      };
+    });
+}
+
+function selectEvent() {
+  var currentEvent = d3.select(this);
+  currentEvent.classed("selected",true);
+  d3.selectAll(".eventSummary").filter(":not(.selected)").transition()
+    .duration(250)
+    .style("left","300px")
+    .on("end",expandEvent(currentEvent));
   currentEvent.on("click",null);
-  currentEvent.insert("div",":first-child")
-      .attr("class","clsBtn")
-      .html("X")
-      .on("click",unSelectEvent);
-  currentEvent.insert("div")
-      .attr("class","delBtn")
-      .html("Delete")
-      .on("click", questionDelete);
-  if (currentEvent.datum().hasOwnProperty('location')) {
-    currentEvent.append("p")
-      .attr("class","locDesc")
-      .html(currentEvent.datum().location);
-  };
-  if (currentEvent.datum().start.hasOwnProperty('date')) {
-    currentEvent.append("p")
-      .html("Starts: " + currentEvent.datum().start.date);
-    currentEvent.append("p")
-      .html("Ends: " + currentEvent.datum().end.date);
-  };
-  if (currentEvent.datum().start.hasOwnProperty('dateTime')) {
-    currentEvent.append("p")
-      .html("Starts: " + currentEvent.datum().start.dateTime.substring(11,16));
-    currentEvent.append("p")
-      .html("Ends: " + currentEvent.datum().end.dateTime.substring(11,16));
-  };
-  if (currentEvent.datum().hasOwnProperty('description')) {
-    currentEvent.append("div")
-      .attr("class","eventDescription")
-      .html("<p>Description:</p> <p>" + currentEvent.datum().description + "</p>")
-  };
 }
 
 function unSelectEvent(event) {
@@ -207,13 +212,17 @@ function unSelectEvent(event) {
   thisEvent.selectAll("p","div").filter(":not(.eventName)").remove();
   d3.selectAll(".eventSummary").transition()
     .duration(500)
-    .attr("style",function(d,i){
+    .style("top",function(d,i){
       if (d3.select("#weather").classed("showing")){
-        return "top:" + (60+i*45) + "px";
+        return (60+i*45) + "px";
       } else {
-        return "top:" + (27+i*45) + "px";
+        return (27+i*45) + "px";
       };
-    }).on("end",function(){
+    })
+    .style("left","0px")
+    .style("background-color",null)
+    .style("height",null)
+    .on("end",function(){
       d3.selectAll(".eventSummary")
         .classed("selected",false)
         .on("click",selectEvent)
@@ -251,6 +260,43 @@ function deleteEvent() {
     });
 }
 
+function expandWeather(){
+  var eventSummaries = d3.selectAll(".eventSummary");
+  if (eventSummaries.size()>0){
+    eventSummaries.transition()
+      .duration(250)
+      .style("left","300px")
+      .on("end",function(){
+        d3.select("#weather").transition()
+          .duration(500)
+          .style("max-height","500px");
+      });
+  }else{
+    d3.select("#weather").transition()
+      .duration(500)
+      .style("max-height","500px");
+  };
+  d3.select(".circle-plus .circle .vertical")
+    .style("transform","rotate(90deg)");
+  d3.select(".hourlyForecastBtn")
+    .on("click",compressWeather);
+}
+
+function compressWeather(){
+  d3.select("#weather").transition()
+    .duration(500)
+    .style("max-height","30px")
+    .on("end", function(){
+      d3.selectAll(".eventSummary").transition()
+        .duration(250)
+        .style("left","0px");
+    });
+  d3.select(".circle-plus .circle .vertical")
+    .attr("style",null);
+  d3.select(".hourlyForecastBtn")
+    .on("click",expandWeather);
+}
+
 function addWeather(){
   d3.select("#weather").html(function(){
     return "<p class='dailyForecast'><i class='wi "
@@ -274,7 +320,8 @@ function addWeather(){
     .insert("div", ":first-child").classed("hourlyForecastBtn",true)
       .html("<div class='circle-plus'><div class='circle'>"
         + "<div class='horizontal'></div><div class='vertical'></div>"
-        + "</div></div>");
+        + "</div></div>")
+      .on("click",expandWeather);
   //Add hourly weather table
   hourlyTable = d3.select("#weather").append("table").classed("hourlyForecast",true);
   if (selected.data.hasOwnProperty("hourlyForecast")){
@@ -282,32 +329,31 @@ function addWeather(){
       fcRow = hourlyTable.append("tr");
       fcRow.append("td").classed("fc-Hour",true).html(function(){
         return forecastIntervals[selected.data.hourlyForecast[i].$];
-      })
+      });
       fcRow.append("td").classed("fc-W",true).html(function(){
         return "<i class='wi "
           + dp2icons[selected.data.hourlyForecast[i].W]
           + "'></i>";
-      })
+      });
       fcRow.append("td").classed("fc-temp",true).html(function(){
         return selected.data.hourlyForecast[i].T
           + "<i class='wi wi-celsius'></i>";
-      })
+      });
       fcRow.append("td").classed("fc-precip",true).html(function(){
         return "<i class='wi wi-umbrella'></i> "
           + selected.data.hourlyForecast[i].Pp + "%";
-      })
+      });
       fcRow.append("td").classed("fc-wind",true).html(function(){
         return "<i class='wi wi-wind wi-from-"
         + selected.data.hourlyForecast[i].D.toLowerCase()
         + "'></i> "
         + selected.data.hourlyForecast[i].S
         + "mph";
-      })
+      });
       fcRow.append("td").classed("fc-hum",true).html(function(){
         return "<i class='wi wi-humidity'></i> "
         + selected.data.hourlyForecast[i].H + "%";
-      })
-      console.log(selected.data.hourlyForecast[i]);
+      });
     }
   } else {
     getHourlyForecast();
@@ -324,7 +370,7 @@ function selectBox() {
   d3.select("#detailName")
     .html(function(){ return selected.data["longName"];});
   // Add weather summary if there is one
-  d3.select("#weather").html("");
+  d3.select("#weather").html("").attr("style",null);
   if (selected.data.hasOwnProperty("dailyForecast")){
     addWeather();
   } else {

@@ -301,6 +301,7 @@ body {
   display:none;
   margin-bottom: 5px;
   position:relative;
+  overflow: hidden;
 }
 
 /* #detailBox h3 {
@@ -373,19 +374,13 @@ body {
   position:absolute;
   width:100%;
   top:27px;
-  max-height: 0;
-  transition: max-height 0.5s ease-out;
   overflow: hidden;
   font-size: 15px;
   text-align: right;
+  max-height: 30px;
 }
 
-#weather.showing {
-  max-height: 500px;
-  transition: max-height 0.5s ease-in;
-}
-
-#weather i, #weather .Dm {
+#weather i {
   font-size: 20px;
 }
 
@@ -396,22 +391,26 @@ body {
 
 .circle-plus {height:6em; width:6em; font-size:0.25em /*Will change icon size*/;}
 .circle-plus .circle {position: relative; width: 4.5em; height: 4.5em; border-radius: 100%; border: solid .5em #D6D2C4;}
-.circle-plus .circle .horizontal {position: absolute; background-color: #D6D2C4; width: 2.4em; height: .7em; top: 1.9em; left: 1.05em;}
-.circle-plus .circle .vertical {position: absolute; background-color: #D6D2C4; width: .7em; height: 2.4em; top: 1.05em; left: 1.9em;}
+.circle-plus .circle .horizontal {position: absolute; background-color: #D6D2C4;
+  width: 2.4em; height: .7em; top: 1.9em; left: 1.05em; transition: 0.4s}
+.circle-plus .circle .vertical {position: absolute; background-color: #D6D2C4;
+  width: .7em; height: 2.4em; top: 1.05em; left: 1.9em; transition: 0.4s}
 
 .hourlyForecast {
   border-collapse: collapse;
   width: 100%;
   table-layout: fixed;
   white-space: nowrap;
+  margin-top: 15px;
 }
 
 .hourlyForecast tr {
-  border-bottom: 2px solid white;
+  border-bottom: 2px solid #D6D2C4;
 }
 
 .hourlyForecast td {
-  padding: 5px 3px 5px 3px;
+  padding-top: 5px;
+  padding-bottom: 5px;
   overflow: hidden;
   white-space: nowrap;
 }
@@ -435,7 +434,6 @@ body {
 
 .fc-wind, .fc-precip, .fc-hum {
   font-size: 12px;
-  text-align: left;
 }
 
 .fc-hum {
@@ -444,10 +442,13 @@ body {
 
 .fc-precip {
   width: 22%;
+  text-align: left;
+  padding-left: 7px;
 }
 
 .fc-wind {
   width: 22%;
+  text-align: left;
 }
 
 /*-------------- End of detail box styles ----------------*/
