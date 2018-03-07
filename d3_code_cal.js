@@ -140,15 +140,23 @@ function makeDaysArray(iMonth, iYear){
 }
 
 function selectEvent() {
-  d3.selectAll(".eventSummary")
-      .style("display", "none");
   currentEvent = d3.select(this);
-  currentEvent.style("display","block")
-      .transition()
-      .duration(500)
-      .style("background-color","#8F993E")
-      .style("height","366px")
-      .style("cursor","default");
+  currentEvent.classed("selected",true);
+//  d3.select("#weather").classed("showing",false);
+  d3.selectAll(".eventSummary").filter(":not(.selected)").transition()
+    .duration(500)
+    .style("top","500px");
+  currentEvent.transition().duration(500)
+    .style("top", function(){
+      if (d3.select("#weather").classed("showing")){
+        return "60px";
+      }else{
+        return "27px";
+      };
+    })
+    .style("height","333px")
+    .style("background-color","#8F993E")
+    .style("cursor","default");
   currentEvent.on("click",null);
   currentEvent.insert("div",":first-child")
       .attr("class","clsBtn")
@@ -183,19 +191,23 @@ function selectEvent() {
 }
 
 function unSelectEvent(event) {
-  var thisEvent = d3.select(this);
-  d3.select(".clsBtn").remove();
-  d3.select(".delBtn").remove();
-  thisEvent.transition()
-            .duration(0)
-            .style("height","20px")
-            .style("background-color","#AC145A")
-            .on("end", function(d){
-                d3.selectAll(".eventSummary")
-                  .attr("style", null)
-                  .on("click",selectEvent)
-                  .selectAll("p, div").remove();
-                  });
+  var thisEvent = d3.select(".eventSummary.selected");
+  thisEvent.select(".clsBtn").remove();
+  thisEvent.select(".delBtn").remove();
+  thisEvent.selectAll("p","div").filter(":not(.eventName)").remove();
+  d3.selectAll(".eventSummary").transition()
+    .duration(500)
+    .attr("style",function(d,i){
+      if (d3.select("#weather").classed("showing")){
+        return "top:" + (60+i*45) + "px";
+      } else {
+        return "top:" + (27+i*45) + "px";
+      };
+    }).on("end",function(){
+      d3.selectAll(".eventSummary")
+        .classed("selected",false)
+        .on("click",selectEvent)
+    });
 }
 
 function questionDelete() {
@@ -229,6 +241,35 @@ function deleteEvent() {
     });
 }
 
+function addWeather(){
+  d3.select("#weather").html(function(){
+    return "<p class='dailyForecast'><i class='wi "
+      + dp2icons[selected.data.dailyForecast.W]
+      + "'></i>&ensp;"
+      + "<span class='Dm'>" + selected.data.dailyForecast.Dm + "</span>"
+      + "<i class='wi wi-celsius'></i>&ensp;"
+      + " <i class='wi wi-umbrella'></i> "
+      + selected.data.dailyForecast.PPd
+      + "%&ensp;"
+      + "<i class='wi wi-wind wi-from-"
+      + selected.data.dailyForecast.D.toLowerCase()
+      + "'></i> "
+      + selected.data.dailyForecast.S
+      + "mph&ensp;"
+      + "<i class='wi wi-humidity'></i> "
+      + selected.data.dailyForecast.Hn
+      + "%"
+      +"</p>";})
+    .classed("showing",true)
+    .insert("div", ":first-child").classed("hourlyForecastBtn",true)
+      .html("<div class='circle-plus'><div class='circle'>"
+        + "<div class='horizontal'></div><div class='vertical'></div>"
+        + "</div></div>");
+  //Add hourly weather table
+  hourlyTable = d3.select("#weather").append("table").classed("hourlyForecast",true);
+
+}
+
 function selectBox() {
   hideSettings();
   d3.select("#settings .menu-icon-container").classed("change",false);
@@ -241,24 +282,9 @@ function selectBox() {
   // Add weather summary if there is one
   d3.select("#weather").html("");
   if (selected.data.hasOwnProperty("dailyForecast")){
-    d3.select("#weather").html(function(){
-      return "<p><i class='wi "
-        + dp2icons[selected.data.dailyForecast.W]
-        + "'></i>&ensp;"
-        + "<span class='Dm'>" + selected.data.dailyForecast.Dm + "</span>"
-        + "<i class='wi wi-celsius'></i>&ensp;"
-        + " <i class='wi wi-umbrella'></i> "
-        + selected.data.dailyForecast.PPd
-        + "%&ensp;"
-        + "<i class='wi wi-wind wi-from-"
-        + selected.data.dailyForecast.D.toLowerCase()
-        + "'></i> "
-        + selected.data.dailyForecast.S
-        + "mph&ensp;"
-        + "<i class='wi wi-humidity'></i> "
-        + selected.data.dailyForecast.Hn
-        + "%"
-        +"</p>";});
+    addWeather();
+  } else {
+    d3.select("#weather").classed("showing",false);
   };
   d3.selectAll(".eventSummary").remove();
   d3.select("#daysEvents").selectAll(".eventSummary")
@@ -266,7 +292,14 @@ function selectBox() {
     .enter()
       .append("div")
       .attr("class","eventSummary")
-      .html(function(d){ return "<h4>" + d.summary + "</h4>";})
+      .attr("style",function(d,i){
+        if (d3.select("#weather").classed("showing")){
+          return "top:" + (60+i*45) + "px";
+        } else {
+          return "top:" + (27+i*45) + "px";
+        };
+      })
+      .html(function(d){ return "<p class='eventName'>" + d.summary + "</p>";})
       .on("click", selectEvent);
 }
 
@@ -628,9 +661,9 @@ function launchCalendar(){
 
 function restartCalendarTimer(){
   clearTimeout(calendarTimer);
-  calendarTimer = setTimeout(function(){
-    launchSlideshow();
-  },CALENDAR_KEEP_ALIVE_TIME);
+  // calendarTimer = setTimeout(function(){
+  //   launchSlideshow();
+  // },CALENDAR_KEEP_ALIVE_TIME);
 }
 
 function restartActionBarTimer(){

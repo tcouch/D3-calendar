@@ -299,12 +299,14 @@ body {
   font-family: 'Ubuntu', sans-serif;
   color: #D6D2C4;
   display:none;
+  margin-bottom: 5px;
+  position:relative;
 }
 
-#detailBox h3 {
+/* #detailBox h3 {
   color: #D6D2C4;
-  margin-bottom: 6px;
-}
+  margin-bottom: 5px;
+} */
 
 #detailBox.showing {
   display:block;
@@ -312,15 +314,24 @@ body {
 
 #detailName {
   text-align: right;
+  position:absolute;
+  top:0px;
+  height: 22px;
+}
+
+#daysEvents {
+  position:relative;
 }
 
 .eventSummary {
   background-color: #AC145A;
   width: 275px;
+  height: 30px;
   padding: 5px;
-  margin-top: 5px;
   cursor: pointer;
-  position: relative;
+  position: absolute;
+  left: 0;
+  overflow: hidden;
 }
 
 .eventDescription p:nth-child(2){
@@ -331,7 +342,8 @@ body {
 
 .eventSummary p {
   font-size: 15px;
-  margin-top: 10px;
+  font-weight: bold;
+  margin: 5px 0 0 5px;
 }
 
 .locDesc {
@@ -358,13 +370,34 @@ body {
 }
 
 #weather {
+  position:absolute;
+  width:100%;
+  top:27px;
+  max-height: 0;
+  transition: max-height 0.5s ease-out;
+  overflow: hidden;
   font-size: 15px;
   text-align: right;
+}
+
+#weather.showing {
+  max-height: 50px;
+  transition: max-height 0.5s ease-in;
 }
 
 #weather i, #weather .Dm {
   font-size: 20px;
 }
+
+.hourlyForecastBtn {
+  float:right;
+  margin-left: 10px;
+}
+
+.circle-plus {height:6em; width:6em; font-size:0.25em /*Will change icon size*/;}
+.circle-plus .circle {position: relative; width: 4.5em; height: 4.5em; border-radius: 100%; border: solid .5em #D6D2C4;}
+.circle-plus .circle .horizontal {position: absolute; background-color: #D6D2C4; width: 2.4em; height: .7em; top: 1.9em; left: 1.05em;}
+.circle-plus .circle .vertical {position: absolute; background-color: #D6D2C4; width: .7em; height: 2.4em; top: 1.05em; left: 1.9em;}
 
 
 /*-------------- End of detail box styles ----------------*/
