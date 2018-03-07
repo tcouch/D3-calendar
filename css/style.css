@@ -381,7 +381,7 @@ body {
 }
 
 #weather.showing {
-  max-height: 50px;
+  max-height: 500px;
   transition: max-height 0.5s ease-in;
 }
 
@@ -399,6 +399,56 @@ body {
 .circle-plus .circle .horizontal {position: absolute; background-color: #D6D2C4; width: 2.4em; height: .7em; top: 1.9em; left: 1.05em;}
 .circle-plus .circle .vertical {position: absolute; background-color: #D6D2C4; width: .7em; height: 2.4em; top: 1.05em; left: 1.9em;}
 
+.hourlyForecast {
+  border-collapse: collapse;
+  width: 100%;
+  table-layout: fixed;
+  white-space: nowrap;
+}
+
+.hourlyForecast tr {
+  border-bottom: 2px solid white;
+}
+
+.hourlyForecast td {
+  padding: 5px 3px 5px 3px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.fc-Hour {
+  text-align: left;
+  width:12%;
+  padding-left: 0px;
+  font-size: 12px;
+}
+
+.fc-W {
+  text-align: center;
+  width: 15%;
+}
+
+.fc-temp {
+  width:12%;
+  text-align: center;
+}
+
+.fc-wind, .fc-precip, .fc-hum {
+  font-size: 12px;
+  text-align: left;
+}
+
+.fc-hum {
+  width: 16%;
+}
+
+.fc-precip {
+  width: 22%;
+}
+
+.fc-wind {
+  width: 22%;
+}
 
 /*-------------- End of detail box styles ----------------*/
 

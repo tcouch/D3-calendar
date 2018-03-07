@@ -5,6 +5,16 @@ var weekdays = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday",
                 "Sunday"];
 var months = ["January","February","March","April","May","June","July",
               "August","September","October","November","December"];
+var forecastIntervals = {
+  "0":"12am",
+  "180":"3am",
+  "360":"6am",
+  "540":"9am",
+  "720":"12pm",
+  "900":"3pm",
+  "1080":"6pm",
+  "1260":"9pm"
+}
 var imgSources = [];
 
 var today, date, month, year;
@@ -267,7 +277,41 @@ function addWeather(){
         + "</div></div>");
   //Add hourly weather table
   hourlyTable = d3.select("#weather").append("table").classed("hourlyForecast",true);
-
+  if (selected.data.hasOwnProperty("hourlyForecast")){
+    for (var i=0; i<selected.data.hourlyForecast.length; i++) {
+      fcRow = hourlyTable.append("tr");
+      fcRow.append("td").classed("fc-Hour",true).html(function(){
+        return forecastIntervals[selected.data.hourlyForecast[i].$];
+      })
+      fcRow.append("td").classed("fc-W",true).html(function(){
+        return "<i class='wi "
+          + dp2icons[selected.data.hourlyForecast[i].W]
+          + "'></i>";
+      })
+      fcRow.append("td").classed("fc-temp",true).html(function(){
+        return selected.data.hourlyForecast[i].T
+          + "<i class='wi wi-celsius'></i>";
+      })
+      fcRow.append("td").classed("fc-precip",true).html(function(){
+        return "<i class='wi wi-umbrella'></i> "
+          + selected.data.hourlyForecast[i].Pp + "%";
+      })
+      fcRow.append("td").classed("fc-wind",true).html(function(){
+        return "<i class='wi wi-wind wi-from-"
+        + selected.data.hourlyForecast[i].D.toLowerCase()
+        + "'></i> "
+        + selected.data.hourlyForecast[i].S
+        + "mph";
+      })
+      fcRow.append("td").classed("fc-hum",true).html(function(){
+        return "<i class='wi wi-humidity'></i> "
+        + selected.data.hourlyForecast[i].H + "%";
+      })
+      console.log(selected.data.hourlyForecast[i]);
+    }
+  } else {
+    getHourlyForecast();
+  };
 }
 
 function selectBox() {
@@ -358,32 +402,16 @@ function getDailyForecast(){
           forecast[i]["day"] = periods[i].Rep[0];
           forecast[i]["night"] = periods[i].Rep[1];
         };
-        addDailyForecastSymbols();
+        addDailyForecastToCalendar();
       });
     });
 }
 
-function getHourlyForecast(){
-  var forecastType = "3hourly";
-  query = DATAPOINT_BASE + DATAPOINT_LOCATION_ID + "?res=" + forecastType + "&key=" + DATAPOINT_KEY;
-  fetch(query)
-    .then(function(response) {
-      response.json().then(function(jResponse) {
-        var periods = jResponse.SiteRep.DV.Location.Period;
-        for (var i=0; i<5; i++) {
-          forecast[i]["date"] = new Date(periods[i].value);
-          forecast[i]["hourly"] = periods[i].Rep;
-        };
-        addForecastData();
-      });
-    });
-}
 
-function addDailyForecastSymbols() {
+function addDailyForecastToCalendar() {
   for (var i=0; i<5; i++) {
     for (j = 0 ; j < 42; j++) {
       if (dateBoxData[j].date.getTime() === forecast[i].date.getTime()) {
-        console.log("Adding forecast to: " + dateBoxData[j].date)
         dateBoxData[j]["dailyForecast"] = forecast[i].day;
       };
     };
@@ -400,6 +428,33 @@ function addDailyForecastSymbols() {
                             +"&deg;C</p>"};
       });
 }
+
+function getHourlyForecast(){
+  var forecastType = "3hourly";
+  query = DATAPOINT_BASE + DATAPOINT_LOCATION_ID + "?res=" + forecastType + "&key=" + DATAPOINT_KEY;
+  fetch(query)
+    .then(function(response) {
+      response.json().then(function(jResponse) {
+        var periods = jResponse.SiteRep.DV.Location.Period;
+        for (var i=0; i<5; i++) {
+          forecast[i]["date"] = new Date(periods[i].value);
+          forecast[i]["hourly"] = periods[i].Rep;
+        };
+        addHourlyForecast();
+      });
+    });
+}
+
+function addHourlyForecast(){
+  for (var i=0; i<5; i++) {
+    for (j = 0 ; j < 42; j++) {
+      if (dateBoxData[j].date.getTime() === forecast[i].date.getTime()) {
+        dateBoxData[j]["hourlyForecast"] = forecast[i].hourly;
+      };
+    };
+  };
+}
+
 
 function drawMonth(iMonth,iYear) {
   dateBoxData = makeDaysArray(iMonth, iYear);
@@ -420,7 +475,7 @@ function drawMonth(iMonth,iYear) {
     .html(months[iMonth] + " " + iYear);
   if (dateBoxData[0]["date"] <= forecastLimit && today <= dateBoxData[41]["date"]) {
     if (forecast[0].hasOwnProperty("daily")) {
-      addDailyForecastSymbols();
+      addDailyForecastToCalendar();
     }else{
       getDailyForecast();
     };
