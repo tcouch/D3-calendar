@@ -767,9 +767,9 @@ function launchCalendar(){
 
 function restartCalendarTimer(){
   clearTimeout(calendarTimer);
-  // calendarTimer = setTimeout(function(){
-  //   launchSlideshow();
-  // },CALENDAR_KEEP_ALIVE_TIME);
+  calendarTimer = setTimeout(function(){
+    launchSlideshow();
+  },CALENDAR_KEEP_ALIVE_TIME);
 }
 
 function restartActionBarTimer(){
