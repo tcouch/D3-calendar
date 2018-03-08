@@ -211,7 +211,7 @@ function unSelectEvent(event) {
   thisEvent.select(".delBtn").remove();
   thisEvent.selectAll("p","div").filter(":not(.eventName)").remove();
   d3.selectAll(".eventSummary").transition()
-    .duration(500)
+    .duration(250)
     .style("top",function(d,i){
       if (d3.select("#weather").classed("showing")){
         return (60+i*45) + "px";
@@ -219,13 +219,17 @@ function unSelectEvent(event) {
         return (27+i*45) + "px";
       };
     })
-    .style("left","0px")
     .style("background-color",null)
     .style("height",null)
     .on("end",function(){
-      d3.selectAll(".eventSummary")
-        .classed("selected",false)
-        .on("click",selectEvent)
+      d3.selectAll(".eventSummary").transition()
+        .duration(250)
+        .style("left","0px")
+        .on("end",function(){
+          d3.selectAll(".eventSummary")
+            .classed("selected",false)
+            .on("click",selectEvent)
+        });
     });
 }
 
