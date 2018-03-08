@@ -11,16 +11,19 @@
   <link href="https://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet">
   <script type="text/javascript" src="d3.v4.js"></script>
   <script type="text/javascript" src="secrets.json"></script>
+  <script type="text/javascript" src="slidedecks.json"></script>
   <script type="text/javascript" src="dp2icons.json"></script>
 </head>
 <body>
   <div id="carousel"></div>
   <div id="actionBar">
+    <div id="deck-selector"></div>
     <div id="date-info"></div>
     <div id="weather-info"></div>
     <div id="action-button-wrapper">
-      <button id="prev-slide"><<</button>
-      <button id="next-slide">>></button>
+      <button id="prev-slide" ><i class="arrow left"></i></button>
+      <button id="next-slide" ><i class="arrow right"></i></button>
+      <button id="choose-deck">Change slides</button>
       <button id="show-calendar">Show calendar</button>
     </div>
   </div>

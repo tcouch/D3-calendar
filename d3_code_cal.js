@@ -5,17 +5,10 @@ var weekdays = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday",
                 "Sunday"];
 var months = ["January","February","March","April","May","June","July",
               "August","September","October","November","December"];
-var forecastIntervals = {
-  "0":"12am",
-  "180":"3am",
-  "360":"6am",
-  "540":"9am",
-  "720":"12pm",
-  "900":"3pm",
-  "1080":"6pm",
-  "1260":"9pm"
-}
+var forecastIntervals = {"0":"12am","180":"3am","360":"6am","540":"9am",
+                          "720":"12pm","900":"3pm","1080":"6pm","1260":"9pm"};
 var imgSources = [];
+var carouselLength=1;
 
 var today, date, month, year;
 var forecastLimit;
@@ -43,6 +36,10 @@ var DATAPOINT_LOCATION_ID = "324153";
 
 // Get weather icon classes from dp2icons.json
 var dp2icons = JSON.parse(dp2icons);
+
+// Get slidedecks from slidedecks.json
+var slidedecks = JSON.parse(slidedecks);
+var deckName = slidedecks.children[0].name;
 
 // Array of API discovery doc URLs for APIs used by the calendar
 var DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest",
@@ -150,10 +147,12 @@ function makeDaysArray(iMonth, iYear){
 }
 
 function expandEvent(currentEvent){
+  currentEvent.select(".eventToggle .circle-plus .circle .vertical")
+    .style("transform","rotate(90deg)");
   currentEvent.transition().duration(500)
     .style("top", function(){
       if (d3.select("#weather").classed("showing")){
-        return "60px";
+        return "65px";
       }else{
         return "27px";
       };
@@ -162,10 +161,8 @@ function expandEvent(currentEvent){
     .style("background-color","#8F993E")
     .style("cursor","default")
     .on("end",function(){
-      currentEvent.insert("div",":first-child")
-          .attr("class","clsBtn")
-          .html("X")
-          .on("click",unSelectEvent);
+      currentEvent.select(".eventToggle")
+          .on("click",unSelectEvent)
       currentEvent.insert("div")
           .attr("class","delBtn")
           .html("Delete")
@@ -207,14 +204,15 @@ function selectEvent() {
 
 function unSelectEvent(event) {
   var thisEvent = d3.select(".eventSummary.selected");
-  thisEvent.select(".clsBtn").remove();
   thisEvent.select(".delBtn").remove();
+  thisEvent.select(".circle-plus .circle .vertical")
+    .style("transform",null);
   thisEvent.selectAll("p","div").filter(":not(.eventName)").remove();
   d3.selectAll(".eventSummary").transition()
     .duration(250)
     .style("top",function(d,i){
       if (d3.select("#weather").classed("showing")){
-        return (60+i*45) + "px";
+        return (65+i*45) + "px";
       } else {
         return (27+i*45) + "px";
       };
@@ -303,65 +301,71 @@ function compressWeather(){
 
 function addWeather(){
   d3.select("#weather").html(function(){
-    return "<p class='dailyForecast'><i class='wi "
+    return "<table class='dailyForecast'><tr><td><i class='wi "
       + dp2icons[selected.data.dailyForecast.W]
-      + "'></i>&ensp;"
+      + "'></i></td><td>"
       + "<span class='Dm'>" + selected.data.dailyForecast.Dm + "</span>"
-      + "<i class='wi wi-celsius'></i>&ensp;"
-      + " <i class='wi wi-umbrella'></i> "
+      + "<i class='wi wi-celsius'></i></td><td>"
+      + "<i class='wi wi-umbrella'></i> "
       + selected.data.dailyForecast.PPd
-      + "%&ensp;"
+      + "%</td><td>"
       + "<i class='wi wi-wind wi-from-"
       + selected.data.dailyForecast.D.toLowerCase()
-      + "'></i> "
+      + "'></i>"
       + selected.data.dailyForecast.S
-      + "mph&ensp;"
+      + "mph</td><td>"
       + "<i class='wi wi-humidity'></i> "
       + selected.data.dailyForecast.Hn
       + "%"
-      +"</p>";})
+      +"</td></tr></table>";})
     .classed("showing",true)
-    .insert("div", ":first-child").classed("hourlyForecastBtn",true)
-      .html("<div class='circle-plus'><div class='circle'>"
-        + "<div class='horizontal'></div><div class='vertical'></div>"
-        + "</div></div>")
-      .on("click",expandWeather);
   //Add hourly weather table
-  hourlyTable = d3.select("#weather").append("table").classed("hourlyForecast",true);
   if (selected.data.hasOwnProperty("hourlyForecast")){
-    for (var i=0; i<selected.data.hourlyForecast.length; i++) {
-      fcRow = hourlyTable.append("tr");
-      fcRow.append("td").classed("fc-Hour",true).html(function(){
-        return forecastIntervals[selected.data.hourlyForecast[i].$];
-      });
-      fcRow.append("td").classed("fc-W",true).html(function(){
-        return "<i class='wi "
-          + dp2icons[selected.data.hourlyForecast[i].W]
-          + "'></i>";
-      });
-      fcRow.append("td").classed("fc-temp",true).html(function(){
-        return selected.data.hourlyForecast[i].T
-          + "<i class='wi wi-celsius'></i>";
-      });
-      fcRow.append("td").classed("fc-precip",true).html(function(){
-        return "<i class='wi wi-umbrella'></i> "
-          + selected.data.hourlyForecast[i].Pp + "%";
-      });
-      fcRow.append("td").classed("fc-wind",true).html(function(){
-        return "<i class='wi wi-wind wi-from-"
-        + selected.data.hourlyForecast[i].D.toLowerCase()
-        + "'></i> "
-        + selected.data.hourlyForecast[i].S
-        + "mph";
-      });
-      fcRow.append("td").classed("fc-hum",true).html(function(){
-        return "<i class='wi wi-humidity'></i> "
-        + selected.data.hourlyForecast[i].H + "%";
-      });
-    }
+    makeHourlyWeatherTable();
   } else {
     getHourlyForecast();
   };
+}
+
+function makeHourlyWeatherTable(){
+  console.log("make w table");
+  d3.select("#weather .dailyForecast tr").append("td").append("div")
+    .classed("hourlyForecastBtn",true)
+    .html("<div class='circle-plus'><div class='circle'>"
+      + "<div class='horizontal'></div><div class='vertical'></div>"
+      + "</div></div>")
+    .on("click",expandWeather);
+  hourlyTable = d3.select("#weather").append("table").classed("hourlyForecast",true);
+  for (var i=0; i<selected.data.hourlyForecast.length; i++) {
+    fcRow = hourlyTable.append("tr");
+    fcRow.append("td").classed("fc-Hour",true).html(function(){
+      return forecastIntervals[selected.data.hourlyForecast[i].$];
+    });
+    fcRow.append("td").classed("fc-W",true).html(function(){
+      return "<i class='wi "
+        + dp2icons[selected.data.hourlyForecast[i].W]
+        + "'></i>";
+    });
+    fcRow.append("td").classed("fc-temp",true).html(function(){
+      return selected.data.hourlyForecast[i].T
+        + "<i class='wi wi-celsius'></i>";
+    });
+    fcRow.append("td").classed("fc-precip",true).html(function(){
+      return "<i class='wi wi-umbrella'></i> "
+        + selected.data.hourlyForecast[i].Pp + "%";
+    });
+    fcRow.append("td").classed("fc-wind",true).html(function(){
+      return "<i class='wi wi-wind wi-from-"
+      + selected.data.hourlyForecast[i].D.toLowerCase()
+      + "'></i> "
+      + selected.data.hourlyForecast[i].S
+      + "mph";
+    });
+    fcRow.append("td").classed("fc-hum",true).html(function(){
+      return "<i class='wi wi-humidity'></i> "
+      + selected.data.hourlyForecast[i].H + "%";
+    });
+  }
 }
 
 function selectBox() {
@@ -388,12 +392,16 @@ function selectBox() {
       .attr("class","eventSummary")
       .attr("style",function(d,i){
         if (d3.select("#weather").classed("showing")){
-          return "top:" + (60+i*45) + "px";
+          return "top:" + (65+i*45) + "px";
         } else {
           return "top:" + (27+i*45) + "px";
         };
       })
-      .html(function(d){ return "<p class='eventName'>" + d.summary + "</p>";})
+      .html(function(d){
+        return "<div class='eventToggle'><div class='circle-plus'><div class='circle'>"
+          + "<div class='horizontal'></div><div class='vertical'></div>"
+          + "</div></div></div><p class='eventName'>" + d.summary + "</p>";
+      })
       .on("click", selectEvent);
 }
 
@@ -496,12 +504,19 @@ function getHourlyForecast(){
 }
 
 function addHourlyForecast(){
+  console.log("addingHourlyForecast");
   for (var i=0; i<5; i++) {
     for (j = 0 ; j < 42; j++) {
       if (dateBoxData[j].date.getTime() === forecast[i].date.getTime()) {
         dateBoxData[j]["hourlyForecast"] = forecast[i].hourly;
       };
     };
+  };
+  console.log("selected.data.date: "+selected.data.date);
+  console.log("forecastLimit: "+forecastLimit);
+  console.log("today: "+ today);
+  if (selected.data.date <= forecastLimit && today <= selected.data.date){
+    makeHourlyWeatherTable();
   };
 }
 
@@ -573,7 +588,6 @@ function updateSigninStatus(isSignedIn) {
       authorizeButton.classed("showing",false);
       signoutButton.classed("showing",true);
     };
-    getImageSources();
     getMonthEvents(month, year);
   } else {
     signedIn = false;
@@ -629,27 +643,16 @@ function updateEventsList(firstDayStr, lastDayStr, iMonth, iYear, _callback) {
   }, console.log('Events list update unfulfilled'));
 }
 
-function getImageSources() {
-  gapi.client.drive.files.list({
-    'pageSize': 100,
-    'q': "mimeType='image/jpeg'",
-    'pageToken': pageToken
-  }).then(function(response) {
-    pageToken = response.result.nextPageToken;
-    var files = response.result.files;
-    if (files && files.length > 0) {
-      for (var i = 0; i < files.length; i++) {
-        var file = files[i];
-        //console.log(file.webContentLink);
-        if (file.mimeType == "image/jpeg") {
-          imgSources.push("https://drive.google.com/uc?export=view&id="+file.id)
-        };
-      }
-      prepElevenSlides();
-    } else {
-      console.log('No files found.');
+function updateImageSources() {
+  imgSources = []
+  for (i=0; i<slidedecks.children.length; i++){
+    if (slidedecks.children[i].name === deckName) {
+      for (j=0;j<slidedecks.children[i].children.length;j++){
+        imgSources.push("slidedecks/"+deckName+"/"
+                +slidedecks.children[i].children[j].name);
+      };
     };
-  });
+  };
 }
 
 function hideSettings() {
@@ -705,13 +708,11 @@ function launchCalendar(){
   clearTimeout(slideTimer);
   clearTimeout(actionBarTimer);
   d3.select("#carousel").classed("showing",false);
-  clearTimeout(actionBarTimer);
   d3.select("#actionBar").classed("showing",false);
   // setup menu button
   d3.select("#settings .menu-icon-container")
     .on("click", handleMenuClick);
   d3.select("#detailBox").classed("showing",true);
-
   // weekday labels
   d3.select("#weekdayLabels").selectAll(".dayOfWeek")
     .data(weekdays)
@@ -720,12 +721,12 @@ function launchCalendar(){
         .attr("class","dayOfWeek")
         .attr("id",function(d){return d;})
         .html(function(d){ return "<h3>" + d.substring(0, 2) + "</h3>" ;});
-
   // draw this month and select today
   today = new Date();
   date = today.getDate();
   month = today.getMonth();
   year = today.getFullYear();
+  today = new Date(year,month,date);
   forecastLimit = new Date(year,month,date+5);
   d3.selectAll(".dateBox").remove();
   drawMonth(month,year);
@@ -779,7 +780,9 @@ function restartActionBarTimer(){
     document.querySelector("#carousel").style.cursor = 'none';
     d3.select("#actionBar")
       .classed("showing",false);
-  },5000);
+    d3.selectAll(".deck-opt").remove();
+    d3.select("#actionBar").style("height",null).selectAll("div").style("display",null);
+  },10000);
 }
 
 function showActionBar() {
@@ -790,8 +793,43 @@ function showActionBar() {
   restartActionBarTimer();
 }
 
-function prepElevenSlides() {
-  for (var i=0; i<=10; i++) {
+function showDeckOptions() {
+  d3.select("#actionBar").selectAll("div").style("display","none");
+  d3.select("#deck-selector").style("display",null);
+  d3.select("#actionBar").transition().duration(500)
+    .style("height","100%")
+    .on("end",function(){
+      var deckOpts = d3.select("#deck-selector").selectAll(".deck-opt")
+                      .data(slidedecks.children).enter().append("div")
+                      .classed("deck-opt",true);
+      deckOpts.append("img").attr("src",function(d){
+        return "slidedecks/"+d.name+"/"+d.children[0].name;
+        });
+      deckOpts.append("p").html(function(d){
+        return d.name;
+      });
+      deckOpts.on("click",function(d){
+        deckName = d.name;
+        d3.selectAll(".deck-opt").remove();
+        d3.select("#actionBar").selectAll("div").style("display",null);
+        d3.select("#actionBar").transition().duration(500)
+          .style("height",null);
+        launchSlideshow();
+      });
+    });
+}
+
+function prepSlides() {
+  d3.selectAll(".slide").remove();
+  if (imgSources.length>=11) {
+    carouselLength = 11;
+    slidePosition = 6;
+  }else{
+    carouselLength = imgSources.length;
+    slidePosition = Math.floor(carouselLength / 2);
+  };
+  for (var i=0; i<carouselLength; i++) {
+    checkImgCounter();
     d3.select("#carousel")
       .append("img")
         .attr("src",imgSources[imgCounter])
@@ -807,18 +845,32 @@ function removeSlide(position) {
 function addSlide(end=true) {
   carousel=d3.select("#carousel");
   if (end) {
+    checkImgCounter();
     carousel.append("img")
       .attr("src",imgSources[imgCounter])
       .classed("slide",true)
       .on("click",showActionBar);
   } else {
-    var imgNumber = imgCounter - 12;
+    var imgNumber = imgCounter - carouselLength - 1;
     if (imgNumber < 0) {
-      imgNumber = imgNumber + 100;
+      imgNumber = imgNumber + imgSources.length;
+    };
+    if (imgNumber < 0) {
+      imgNumber = imgNumber + imgSources.length;
     };
     carousel.insert("img",":first-child")
       .attr("src",imgSources[imgNumber])
-      .classed("slide",true);
+      .classed("slide",true)
+      .on("click",showActionBar);
+  };
+}
+
+function checkImgCounter(){
+  if (imgCounter>(imgSources.length-1)) {
+    imgCounter=0;
+  }else if (imgCounter<0) {
+    imgCounter=imgSources.length+imgCounter;
+    checkImgCounter();
   };
 }
 
@@ -826,9 +878,6 @@ function showNextSlide(){
   removeSlide(1);
   addSlide();
   imgCounter++;
-  if (imgCounter>99) {
-    imgCounter=0;
-  }
   if (currentImage) {
     currentImage.classed("showing",false);
   }
@@ -838,12 +887,9 @@ function showNextSlide(){
 }
 
 function showPreviousSlide(){
-  removeSlide(11);
+  removeSlide(carouselLength);
   addSlide(end=false)
   imgCounter--;
-  if (imgCounter<0) {
-    imgCounter=99;
-  };
   if (currentImage) {
     currentImage.classed("showing",false);
   }
@@ -864,6 +910,10 @@ function handleShowCalendarClick(){
   launchCalendar();
 }
 
+function handleChooseDeckClick(){
+  showDeckOptions();
+}
+
 function cycleSlideshow() {
   clearTimeout(slideTimer);
   slideTimer = setTimeout(function () {
@@ -873,6 +923,9 @@ function cycleSlideshow() {
 
 function launchSlideshow() {
   console.log("Launching slide show");
+  updateImageSources();
+  imgCounter = imgCounter - carouselLength;
+  prepSlides();
   d3.select("#carousel")
     .classed("showing",true)
     .on("click",showActionBar);
@@ -887,6 +940,7 @@ function setupActionBar() {
   d3.select("#prev-slide").on("click",handlePrevSlideClick);
   d3.select("#next-slide").on("click",handleNextSlideClick);
   d3.select("#show-calendar").on("click",handleShowCalendarClick);
+  d3.select("#choose-deck").on("click",handleChooseDeckClick);
   updateTodaySummary();
   d3.select("#date-info")
     .html(function(){ return "<p>" + todaySummary["longName"] + "</p>" });
