@@ -328,7 +328,6 @@ function addWeather(){
 }
 
 function makeHourlyWeatherTable(){
-  console.log("make w table");
   d3.select("#weather .dailyForecast tr").append("td").append("div")
     .classed("hourlyForecastBtn",true)
     .html("<div class='circle-plus'><div class='circle'>"
@@ -415,7 +414,6 @@ function getMonthEvents(iMonth,iYear) {
 }
 
 function addEventsData(iMonth, iYear) {
-  console.log('running addEventsData');
   if (eventsList.length > 0) {
     for (i=0;i<eventsList.length;i++) {
       var event = eventsList[i];
@@ -504,7 +502,6 @@ function getHourlyForecast(){
 }
 
 function addHourlyForecast(){
-  console.log("addingHourlyForecast");
   for (var i=0; i<5; i++) {
     for (j = 0 ; j < 42; j++) {
       if (dateBoxData[j].date.getTime() === forecast[i].date.getTime()) {
@@ -512,9 +509,6 @@ function addHourlyForecast(){
       };
     };
   };
-  console.log("selected.data.date: "+selected.data.date);
-  console.log("forecastLimit: "+forecastLimit);
-  console.log("today: "+ today);
   if (selected.data.date <= forecastLimit && today <= selected.data.date){
     makeHourlyWeatherTable();
   };
@@ -656,22 +650,22 @@ function updateImageSources() {
 }
 
 function hideSettings() {
-  signoutButton.classed("showing",false);
-  authorizeButton.classed("showing",false);
-  detailBox.classed("showing",true);
+  signoutButton.classed("showing",false).style("opacity",null);
+  authorizeButton.classed("showing",false).style("opacity",null);
   settingsMenu.classed("showing",false);
 }
 
 function showSettings() {
   settingsMenu.classed("showing",true);
   setTimeout(function(){
-    detailBox.classed("showing",false);
     if (signedIn) {
-      signoutButton.classed("showing",true);
+      signoutButton.classed("showing",true)
+        .transition().duration(250).style("opacity",1);
     } else {
-      authorizeButton.classed("showing",true);
+      authorizeButton.classed("showing",true)
+        .transition().duration(250).style("opacity",1);
     };
-  },500);
+  },250);
 }
 
 function handleMenuClick() {
@@ -703,12 +697,32 @@ function updateTodaySummary(){
   updateDateSummary(d,todaySummary);
 }
 
-function launchCalendar(){
+function showCalendar(){
   // stop slideshow
   clearTimeout(slideTimer);
   clearTimeout(actionBarTimer);
   d3.select("#carousel").classed("showing",false);
   d3.select("#actionBar").classed("showing",false);
+
+  // draw this month and select today
+  today = new Date();
+  date = today.getDate();
+  month = today.getMonth();
+  year = today.getFullYear();
+  today = new Date(year,month,date);
+  forecastLimit = new Date(year,month,date+5);
+  d3.selectAll(".dateBox").remove();
+  drawMonth(month,year);
+  if (gapi.auth2.getAuthInstance().isSignedIn.get()) {
+    getMonthEvents(month,year)
+  };
+  selected = d3.select(getBoxID(date,month,year));
+  selected.each(selectBox);
+  //  start timer for Slideshow
+  restartCalendarTimer();
+}
+
+function launchCalendar(){
   // setup menu button
   d3.select("#settings .menu-icon-container")
     .on("click", handleMenuClick);
@@ -732,7 +746,6 @@ function launchCalendar(){
   drawMonth(month,year);
   selected = d3.select(getBoxID(date,month,year));
   selected.each(selectBox);
-
   // make next/prev buttons work
   d3.select("#monthPrev")
     .on("click", function(){
@@ -907,7 +920,7 @@ function handlePrevSlideClick(){
 }
 
 function handleShowCalendarClick(){
-  launchCalendar();
+  showCalendar();
 }
 
 function handleChooseDeckClick(){
