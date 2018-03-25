@@ -221,3 +221,5 @@ pip-log.txt
 
 secrets.json
 .atom-live-server.json
+slidedecks
+slidedecks.json
