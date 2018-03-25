@@ -219,6 +219,7 @@ function unSelectEvent(event) {
     })
     .style("background-color",null)
     .style("height",null)
+    .style("cursor",null)
     .on("end",function(){
       d3.selectAll(".eventSummary").transition()
         .duration(250)

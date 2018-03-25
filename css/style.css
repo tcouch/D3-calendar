@@ -335,12 +335,13 @@ body {
 .eventSummary {
   background-color: #AC145A;
   width: 275px;
-  height: 30px;
+  min-height: 30px;
   padding: 5px;
   cursor: pointer;
   position: absolute;
   left: 0;
   overflow: hidden;
+  cursor: pointer;
 }
 
 .eventDescription p:nth-child(2){
@@ -352,7 +353,7 @@ body {
 .eventSummary p {
   font-size: 15px;
   font-weight: bold;
-  margin: 5px 0 0 5px;
+  margin: 5px 0 5px 5px;
 }
 
 .locDesc {
